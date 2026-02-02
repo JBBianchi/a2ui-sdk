@@ -8,14 +8,15 @@ url: https://a2ui-sdk.js.org/api/
 
 ### React
 
-```typescript
+````typescript
 // @a2ui-sdk/react/0.8
 
 /**
  * Provider component that processes A2UI messages and sets up contexts.
+ * The messages prop is optional - use useA2UIMessageHandler hook for incremental updates.
  */
 function A2UIProvider(props: {
-  messages: A2UIMessage[]
+  messages?: A2UIMessage[]
   catalog?: Catalog
   children: React.ReactNode
 }): React.ReactElement
@@ -124,7 +125,45 @@ interface ActionContextValue {
   ) => void
   onAction: ActionHandler | null
 }
-```
+
+/**
+ * Hook for processing A2UI messages incrementally.
+ * Use this to push messages without clearing existing state,
+ * preserving user edits when new messages arrive.
+ *
+ * @returns Object with processMessage, processMessages, and clear functions
+ *
+ * @example
+ * ```tsx
+ * function MessageHandler({ children }) {
+ *   const { processMessage, processMessages } = useA2UIMessageHandler()
+ *
+ *   useEffect(() => {
+ *     // Listen for incremental updates
+ *     const ws = new WebSocket('ws://example.com')
+ *     ws.onmessage = (event) => {
+ *       processMessage(JSON.parse(event.data))
+ *     }
+ *
+ *     return () => ws.close()
+ *   }, [processMessage, processMessages])
+ *
+ *   return <>{children}</>
+ * }
+ *
+ * <A2UIProvider>
+ *   <MessageHandler>
+ *     <A2UIRenderer onAction={handleAction} />
+ *   </MessageHandler>
+ * </A2UIProvider>
+ * ```
+ */
+function useA2UIMessageHandler(): {
+  processMessage: (message: A2UIMessage) => void
+  processMessages: (messages: A2UIMessage[]) => void
+  clear: () => void
+}
+````
 
 ### Utils
 
@@ -317,14 +356,15 @@ interface ScopeValue {
 
 ### React
 
-```typescript
+````typescript
 // @a2ui-sdk/react/0.9
 
 /**
  * Provider component that processes A2UI messages and sets up contexts.
+ * The messages prop is optional - use useA2UIMessageHandler hook for incremental updates.
  */
 function A2UIProvider(props: {
-  messages: A2UIMessage[]
+  messages?: A2UIMessage[]
   catalog?: Catalog
   children: React.ReactNode
 }): React.ReactElement
@@ -445,7 +485,45 @@ interface ActionContextValue {
   ) => void
   onAction: ActionHandler | null
 }
-```
+
+/**
+ * Hook for processing A2UI messages incrementally.
+ * Use this to push messages without clearing existing state,
+ * preserving user edits when new messages arrive.
+ *
+ * @returns Object with processMessage, processMessages, and clear functions
+ *
+ * @example
+ * ```tsx
+ * function MessageHandler({ children }) {
+ *   const { processMessage, processMessages } = useA2UIMessageHandler()
+ *
+ *   useEffect(() => {
+ *     // Listen for incremental updates
+ *     const ws = new WebSocket('ws://example.com')
+ *     ws.onmessage = (event) => {
+ *       processMessage(JSON.parse(event.data))
+ *     }
+ *
+ *     return () => ws.close()
+ *   }, [processMessage, processMessages])
+ *
+ *   return <>{children}</>
+ * }
+ *
+ * <A2UIProvider>
+ *   <MessageHandler>
+ *     <A2UIRenderer onAction={handleAction} />
+ *   </MessageHandler>
+ * </A2UIProvider>
+ * ```
+ */
+function useA2UIMessageHandler(): {
+  processMessage: (message: A2UIMessage) => void
+  processMessages: (messages: A2UIMessage[]) => void
+  clear: () => void
+}
+````
 
 ### Utils
 

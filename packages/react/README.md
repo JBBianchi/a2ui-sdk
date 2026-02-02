@@ -220,6 +220,7 @@ import {
   useSurfaceContext,
   useScope,
   useScopeBasePath,
+  useA2UIMessageHandler,
 
   // Context Providers & Hooks
   ActionProvider,
@@ -245,6 +246,7 @@ import {
   type ValidationResult,
   type ScopeValue,
   type DataModel,
+  type A2UIMessageHandler,
 } from '@a2ui-sdk/react/0.9'
 ```
 
@@ -268,6 +270,7 @@ import {
   useDataModelContext,
   useScope,
   useScopeBasePath,
+  useA2UIMessageHandler,
 
   // Context Providers & Hooks
   ActionProvider,
@@ -282,6 +285,7 @@ import {
   type Action,
   type ValueSource,
   type ScopeValue,
+  type A2UIMessageHandler,
 } from '@a2ui-sdk/react/0.8'
 ```
 
@@ -294,7 +298,91 @@ import { v0_8, v0_9 } from '@a2ui-sdk/react'
 const { A2UIProvider, A2UIRenderer } = v0_9
 ```
 
+## Incremental Message Handling
+
+**New in v0.8 & v0.9**: For applications that receive messages incrementally (e.g., via WebSocket or SSE), you can use the `useA2UIMessageHandler` hook to push new messages without clearing state. This preserves user edits.
+
+### Problem
+
+When using the `messages` prop on `A2UIProvider`, changing the messages array causes the provider to clear all state and reprocess from scratch. This loses user edits:
+
+```tsx
+// ❌ This loses user edits when new messages arrive
+function App() {
+  const [messages, setMessages] = useState<A2UIMessage[]>([])
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://example.com')
+    ws.onmessage = (event) => {
+      const newMessage = JSON.parse(event.data)
+      setMessages((prev) => [...prev, newMessage]) // Triggers full clear & reprocess!
+    }
+  }, [])
+
+  return (
+    <A2UIProvider messages={messages}>
+      <A2UIRenderer onAction={handleAction} />
+    </A2UIProvider>
+  )
+}
+```
+
+### Solution
+
+Use `useA2UIMessageHandler` hook to process messages incrementally:
+
+```tsx
+import {
+  A2UIProvider,
+  A2UIRenderer,
+  useA2UIMessageHandler,
+  type A2UIMessage,
+  type A2UIAction,
+} from '@a2ui-sdk/react/0.8' // or '@a2ui-sdk/react/0.9'
+
+function App() {
+  const handleAction = (action: A2UIAction) => {
+    console.log('Action:', action)
+  }
+
+  return (
+    <A2UIProvider>
+      <MessageHandler>
+        <A2UIRenderer onAction={handleAction} />
+      </MessageHandler>
+    </A2UIProvider>
+  )
+}
+
+function MessageHandler({ children }: { children: React.ReactNode }) {
+  const { processMessage } = useA2UIMessageHandler()
+
+  useEffect(() => {
+    // Listen for incremental updates
+    const ws = new WebSocket('ws://example.com')
+    ws.onmessage = (event) => {
+      const newMessage = JSON.parse(event.data)
+      processMessage(newMessage) // Incremental - preserves user edits!
+    }
+
+    return () => ws.close()
+  }, [processMessage])
+
+  return <>{children}</>
+}
+```
+
+The `useA2UIMessageHandler` hook returns:
+
+- **`processMessage(message: A2UIMessage)`**: Process a single message incrementally
+- **`processMessages(messages: A2UIMessage[])`**: Process multiple messages in order
+- **`clear()`**: Clear all surfaces and state (rarely needed)
+
 ## Hooks
+
+### useA2UIMessageHandler
+
+See [Incremental Message Handling](#incremental-message-handling) above for usage details.
 
 ### useDataBinding
 

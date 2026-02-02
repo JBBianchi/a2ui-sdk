@@ -63,8 +63,12 @@ import { standardCatalog, type Catalog } from '../standard-catalog'
  * Props for A2UIProvider.
  */
 export interface A2UIProviderProps {
-  /** Array of A2UI messages to render */
-  messages: A2UIMessage[]
+  /**
+   * Array of A2UI messages to render.
+   * When this prop changes, all state is cleared and messages are reprocessed.
+   * For incremental updates, use useA2UIMessageHandler hook inside the provider.
+   */
+  messages?: A2UIMessage[]
   /**
    * Catalog containing components and functions.
    * Use `standardCatalog` from '@a2ui-sdk/react/0.9/standard-catalog' as base.
@@ -89,19 +93,21 @@ function A2UIMessageProcessor({
   messages,
   children,
 }: {
-  messages: A2UIMessage[]
+  messages?: A2UIMessage[]
   children: ReactNode
 }) {
   const { processMessages, clear } = useA2UIMessageHandler()
 
   // Process messages when they change
   useEffect(() => {
-    // Clear existing state and process new messages
-    clear()
-    if (messages && messages.length > 0) {
-      processMessages(messages)
+    if (messages !== undefined) {
+      // Clear existing state and process new messages
+      clear()
+      if (messages && messages.length > 0) {
+        processMessages(messages)
+      }
     }
-  }, [messages, processMessages, clear])
+  }, [messages, clear, processMessages])
 
   return <>{children}</>
 }
@@ -160,9 +166,6 @@ export function A2UIProvider({
   catalog,
   children,
 }: A2UIProviderProps) {
-  // Handle null/undefined messages gracefully
-  const safeMessages = messages ?? []
-
   // Determine the components to use:
   // 1. If catalog is provided, use catalog.components directly
   // 2. Otherwise, use standard catalog
@@ -171,7 +174,7 @@ export function A2UIProvider({
   return (
     <SurfaceProvider>
       <ComponentsMapProvider components={effectiveCatalog.components}>
-        <A2UIMessageProcessor messages={safeMessages}>
+        <A2UIMessageProcessor messages={messages}>
           {children}
         </A2UIMessageProcessor>
       </ComponentsMapProvider>
