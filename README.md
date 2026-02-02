@@ -57,22 +57,34 @@ Next, use `A2UIProvider` and `A2UIRenderer` to render A2UI messages:
 import {
   A2UIProvider,
   A2UIRenderer,
+  useA2UIMessageHandler,
   type A2UIMessage,
   type A2UIAction,
 } from '@a2ui-sdk/react/0.8'
 
 function App() {
-  const messages: A2UIMessage[] = []
+  return (
+    <A2UIProvider>
+      <MyApp />
+    </A2UIProvider>
+  )
+}
+
+function MyApp() {
+  const { processMessage } = useA2UIMessageHandler()
+
+  useEffect(() => {
+    const message: A2UIMessage = {
+      // ...  A2UI message from your backend
+    }
+    processMessage(message)
+  }, [processMessage])
 
   const handleAction = (action: A2UIAction) => {
     console.log('Action received:', action)
   }
 
-  return (
-    <A2UIProvider messages={messages}>
-      <A2UIRenderer onAction={handleAction} />
-    </A2UIProvider>
-  )
+  return <A2UIRenderer onAction={handleAction} />
 }
 ```
 
@@ -185,22 +197,34 @@ Next, use `A2UIProvider` and `A2UIRenderer` to render A2UI messages:
 import {
   A2UIProvider,
   A2UIRenderer,
+  useA2UIMessageHandler,
   type A2UIMessage,
   type A2UIAction,
 } from '@a2ui-sdk/react/0.9'
 
 function App() {
-  const messages: A2UIMessage[] = []
+  return (
+    <A2UIProvider>
+      <MyApp />
+    </A2UIProvider>
+  )
+}
+
+function MyApp() {
+  const { processMessage } = useA2UIMessageHandler()
+
+  useEffect(() => {
+    const message: A2UIMessage = {
+      // ...  A2UI message from your backend
+    }
+    processMessage(message)
+  }, [processMessage])
 
   const handleAction = (action: A2UIAction) => {
     console.log('Action received:', action)
   }
 
-  return (
-    <A2UIProvider messages={messages}>
-      <A2UIRenderer onAction={handleAction} />
-    </A2UIProvider>
-  )
+  return <A2UIRenderer onAction={handleAction} />
 }
 ```
 

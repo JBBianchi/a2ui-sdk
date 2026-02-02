@@ -36,9 +36,6 @@ export interface A2UIMessageHandler {
  *   const { processMessage, processMessages, clear } = useA2UIMessageHandler();
  *
  *   useEffect(() => {
- *     // Process initial messages
- *     processMessages(initialMessages);
- *
  *     // Listen for SSE updates
  *     const handler = (event) => {
  *       processMessage(JSON.parse(event.data));

@@ -309,7 +309,7 @@ When using the `messages` prop on `A2UIProvider`, changing the messages array ca
 ```tsx
 // ❌ This loses user edits when new messages arrive
 function App() {
-  const [messages, setMessages] = useState<A2UIMessage[]>(initialMessages)
+  const [messages, setMessages] = useState<A2UIMessage[]>([])
 
   useEffect(() => {
     const ws = new WebSocket('ws://example.com')
@@ -355,12 +355,9 @@ function App() {
 }
 
 function MessageHandler({ children }: { children: React.ReactNode }) {
-  const { processMessage, processMessages } = useA2UIMessageHandler()
+  const { processMessage } = useA2UIMessageHandler()
 
   useEffect(() => {
-    // Process initial messages
-    processMessages(initialMessages)
-
     // Listen for incremental updates
     const ws = new WebSocket('ws://example.com')
     ws.onmessage = (event) => {
@@ -369,7 +366,7 @@ function MessageHandler({ children }: { children: React.ReactNode }) {
     }
 
     return () => ws.close()
-  }, [processMessage, processMessages])
+  }, [processMessage])
 
   return <>{children}</>
 }

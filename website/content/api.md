@@ -8,7 +8,7 @@ url: https://a2ui-sdk.js.org/api/
 
 ### React
 
-```typescript
+````typescript
 // @a2ui-sdk/react/0.8
 
 /**
@@ -139,9 +139,6 @@ interface ActionContextValue {
  *   const { processMessage, processMessages } = useA2UIMessageHandler()
  *
  *   useEffect(() => {
- *     // Process initial messages
- *     processMessages(initialMessages)
- *
  *     // Listen for incremental updates
  *     const ws = new WebSocket('ws://example.com')
  *     ws.onmessage = (event) => {
@@ -166,7 +163,7 @@ function useA2UIMessageHandler(): {
   processMessages: (messages: A2UIMessage[]) => void
   clear: () => void
 }
-```
+````
 
 ### Utils
 
@@ -359,7 +356,7 @@ interface ScopeValue {
 
 ### React
 
-```typescript
+````typescript
 // @a2ui-sdk/react/0.9
 
 /**
@@ -502,9 +499,6 @@ interface ActionContextValue {
  *   const { processMessage, processMessages } = useA2UIMessageHandler()
  *
  *   useEffect(() => {
- *     // Process initial messages
- *     processMessages(initialMessages)
- *
  *     // Listen for incremental updates
  *     const ws = new WebSocket('ws://example.com')
  *     ws.onmessage = (event) => {
@@ -529,7 +523,7 @@ function useA2UIMessageHandler(): {
   processMessages: (messages: A2UIMessage[]) => void
   clear: () => void
 }
-```
+````
 
 ### Utils
 
