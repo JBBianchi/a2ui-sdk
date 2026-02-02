@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/easyops-cn/a2ui-sdk/compare/types-v0.3.0...types-v0.3.1) (2026-02-02)
+
+
+### Miscellaneous Chores
+
+* **types:** Synchronize A2UI SDK versions
+
 ## [0.3.0](https://github.com/easyops-cn/a2ui-sdk/compare/types-v0.2.2...types-v0.3.0) (2026-01-28)
 
 
