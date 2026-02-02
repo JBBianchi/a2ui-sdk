@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/easyops-cn/a2ui-sdk/compare/react-v0.3.1...react-v0.4.0) (2026-02-02)
+
+
+### Features
+
+* prefer processMessage over messages prop ([c7267ee](https://github.com/easyops-cn/a2ui-sdk/commit/c7267ee22088c784d220fcda34f2decc305ed856))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @a2ui-sdk/types bumped from 0.3.1 to 0.4.0
+    * @a2ui-sdk/utils bumped from 0.3.1 to 0.4.0
+
 ## [0.3.1](https://github.com/easyops-cn/a2ui-sdk/compare/react-v0.3.0...react-v0.3.1) (2026-02-02)
 
 

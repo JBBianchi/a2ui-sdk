@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/easyops-cn/a2ui-sdk/compare/utils-v0.3.1...utils-v0.4.0) (2026-02-02)
+
+
+### Miscellaneous Chores
+
+* **utils:** Synchronize A2UI SDK versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @a2ui-sdk/types bumped from 0.3.1 to 0.4.0
+
 ## [0.3.1](https://github.com/easyops-cn/a2ui-sdk/compare/utils-v0.3.0...utils-v0.3.1) (2026-02-02)
 
 
