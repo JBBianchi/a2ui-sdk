@@ -1,6 +1,6 @@
 # @a2ui-sdk/react
 
-React implementation for rendering A2UI protocol. This package provides React components and hooks for integrating A2UI surfaces into your application.
+React implementation for rendering A2UI protocol. This package provides React components and hooks for integrating A2UI renderer into your application.
 
 ## Installation
 
