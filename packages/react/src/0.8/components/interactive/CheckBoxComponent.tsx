@@ -5,6 +5,7 @@
 import { memo, useCallback } from 'react'
 import type { CheckBoxComponentProps } from '@a2ui-sdk/types/0.8/standard-catalog'
 import { useDataBinding, useFormBinding } from '@/0.8/hooks/useDataBinding'
+import { useScopeBasePath } from '@/0.8/contexts/ScopeContext'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,7 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
 }: A2UIComponentProps<CheckBoxComponentProps>) {
   const labelText = useDataBinding<string>(surfaceId, label, '')
   const [checked, setChecked] = useFormBinding<boolean>(surfaceId, value, false)
+  const basePath = useScopeBasePath()
 
   const handleChange = useCallback(
     (newChecked: boolean) => {
@@ -29,7 +31,10 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
     [setChecked]
   )
 
-  const id = `checkbox-${componentId}`
+  // Include basePath in ID to ensure uniqueness in templated lists
+  const id = basePath
+    ? `checkbox-${componentId}-${basePath.replace(/\//g, '-')}`
+    : `checkbox-${componentId}`
 
   return (
     <div className={cn('flex items-center gap-3')}>
