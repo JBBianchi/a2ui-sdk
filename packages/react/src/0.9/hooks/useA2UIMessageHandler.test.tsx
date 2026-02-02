@@ -405,4 +405,69 @@ describe('useA2UIMessageHandler', () => {
       expect(ctx.getDataModel('main')).toEqual({ step: 2 })
     })
   })
+
+  describe('incremental updates', () => {
+    it('should preserve existing data model values when updating other values', () => {
+      renderWithProvider()
+
+      // Initialize surface with initial data
+      act(() => {
+        handler.processMessages([
+          { createSurface: { surfaceId: 'test', catalogId: 'catalog-1' } },
+          {
+            updateDataModel: {
+              surfaceId: 'test',
+              path: '/title',
+              value: 'Title v1',
+            },
+          },
+          {
+            updateDataModel: {
+              surfaceId: 'test',
+              path: '/text',
+              value: 'One',
+            },
+          },
+        ])
+      })
+
+      expect(ctx.getDataModel('test')).toEqual({
+        title: 'Title v1',
+        text: 'One',
+      })
+
+      // Simulate user editing the text field
+      act(() => {
+        handler.processMessage({
+          updateDataModel: {
+            surfaceId: 'test',
+            path: '/text',
+            value: 'Two',
+          },
+        })
+      })
+
+      expect(ctx.getDataModel('test')).toEqual({
+        title: 'Title v1',
+        text: 'Two',
+      })
+
+      // Server sends update only for title (simulating new message arrival)
+      act(() => {
+        handler.processMessage({
+          updateDataModel: {
+            surfaceId: 'test',
+            path: '/title',
+            value: 'Title v2',
+          },
+        })
+      })
+
+      // Both values should be preserved - title updated, text unchanged
+      expect(ctx.getDataModel('test')).toEqual({
+        title: 'Title v2',
+        text: 'Two',
+      })
+    })
+  })
 })

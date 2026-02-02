@@ -396,4 +396,65 @@ describe('useA2UIMessageHandler', () => {
       consoleError.mockRestore()
     })
   })
+
+  describe('incremental updates', () => {
+    it('should preserve existing data model values when updating other values', () => {
+      const { result } = renderHook(
+        () => {
+          const handler = useA2UIMessageHandler()
+          const { getDataValue } = useDataModelContext()
+          return { handler, getDataValue }
+        },
+        { wrapper }
+      )
+
+      // Initialize surface with initial data
+      act(() => {
+        result.current.handler.processMessages([
+          { beginRendering: { surfaceId: 'test', root: 'root' } },
+          {
+            dataModelUpdate: {
+              surfaceId: 'test',
+              path: '/',
+              contents: [
+                { key: 'title', valueString: 'Title v1' },
+                { key: 'text', valueString: 'One' },
+              ],
+            },
+          },
+        ])
+      })
+
+      expect(result.current.getDataValue('test', '/title')).toBe('Title v1')
+      expect(result.current.getDataValue('test', '/text')).toBe('One')
+
+      // Simulate user editing the text field
+      act(() => {
+        result.current.handler.processMessage({
+          dataModelUpdate: {
+            surfaceId: 'test',
+            path: '/',
+            contents: [{ key: 'text', valueString: 'Two' }],
+          },
+        })
+      })
+
+      expect(result.current.getDataValue('test', '/text')).toBe('Two')
+
+      // Server sends update only for title (simulating new message arrival)
+      act(() => {
+        result.current.handler.processMessage({
+          dataModelUpdate: {
+            surfaceId: 'test',
+            path: '/',
+            contents: [{ key: 'title', valueString: 'Title v2' }],
+          },
+        })
+      })
+
+      // Both values should be preserved - title updated, text unchanged
+      expect(result.current.getDataValue('test', '/title')).toBe('Title v2')
+      expect(result.current.getDataValue('test', '/text')).toBe('Two')
+    })
+  })
 })
