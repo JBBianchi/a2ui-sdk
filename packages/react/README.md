@@ -302,11 +302,11 @@ const { A2UIProvider, A2UIRenderer } = v0_9
 
 ### useA2UIMessageHandler
 
-**New in v0.8 & v0.9**: For applications that receive messages incrementally (e.g., via WebSocket or SSE), `useA2UIMessageHandler` provides a way to push new messages without overwriting existing state. This preserves user edits and avoids re-rendering the entire UI.
+**New in v0.8 & v0.9**: For applications that receive messages incrementally (e.g., via WebSocket or SSE), `useA2UIMessageHandler` provides a way to push new messages without clearing and rebuilding state from scratch. This preserves user edits and avoids full state reprocessing.
 
 #### Problem with Traditional Approach
 
-When using the `messages` prop on `A2UIProvider`, changing the messages array causes the provider to clear all state and reprocess from scratch. This can lose user edits:
+When using the `messages` prop on `A2UIProvider`, changing the messages array causes the provider to clear all state and reprocess from scratch. This loses user edits:
 
 ```tsx
 // ❌ This loses user edits when new messages arrive
@@ -370,7 +370,7 @@ function App() {
   }
 
   return (
-    <A2UIProvider messages={[]}>
+    <A2UIProvider messages={[]} {/* Empty since messages are handled via useA2UIMessageHandler */}>
       <MessageHandler>
         <A2UIRenderer onAction={handleAction} />
       </MessageHandler>
