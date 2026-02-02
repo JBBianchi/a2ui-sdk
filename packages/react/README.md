@@ -347,20 +347,14 @@ function App() {
 
   return (
     <A2UIProvider>
-      <MessageHandler initialMessages={initialMessages}>
+      <MessageHandler>
         <A2UIRenderer onAction={handleAction} />
       </MessageHandler>
     </A2UIProvider>
   )
 }
 
-function MessageHandler({ 
-  initialMessages, 
-  children 
-}: { 
-  initialMessages: A2UIMessage[]
-  children: React.ReactNode 
-}) {
+function MessageHandler({ children }: { children: React.ReactNode }) {
   const { processMessage, processMessages } = useA2UIMessageHandler()
 
   useEffect(() => {
