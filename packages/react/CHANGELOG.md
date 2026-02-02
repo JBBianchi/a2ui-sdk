@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.1](https://github.com/easyops-cn/a2ui-sdk/compare/react-v0.3.0...react-v0.3.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* bump version ([b6de5dc](https://github.com/easyops-cn/a2ui-sdk/commit/b6de5dcdb062fe6d287e9315034dbc3efff3fe57))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @a2ui-sdk/types bumped from 0.3.0 to 0.3.1
+    * @a2ui-sdk/utils bumped from 0.3.0 to 0.3.1
+
 ## [0.3.0](https://github.com/easyops-cn/a2ui-sdk/compare/react-v0.2.2...react-v0.3.0) (2026-01-28)
 
 
