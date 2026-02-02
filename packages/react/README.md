@@ -8,6 +8,11 @@ React implementation for rendering A2UI protocol. This package provides React co
 npm install @a2ui-sdk/react
 ```
 
+### Peer Dependencies
+
+- `react` ^19.0.0
+- `react-dom` ^19.0.0
+
 ## Usage
 
 ### v0.8
