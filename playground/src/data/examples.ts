@@ -1698,4 +1698,113 @@ export const examples: Example[] = [
       },
     ],
   },
+  {
+    id: 'checkbox-list',
+    title: 'Checkbox List',
+    description: 'CheckBox components in a dynamic list with template binding',
+    group: 'Interactive',
+    messages: [
+      {
+        surfaceUpdate: {
+          surfaceId: 'main',
+          components: [
+            {
+              id: 'root',
+              component: {
+                Column: {
+                  children: { explicitList: ['heading', 'fruits-list'] },
+                  alignment: 'start',
+                },
+              },
+            },
+            {
+              id: 'heading',
+              component: {
+                Text: {
+                  text: { literalString: 'Select Your Favorite Fruits' },
+                  usageHint: 'h2',
+                },
+              },
+            },
+            {
+              id: 'fruits-list',
+              component: {
+                Column: {
+                  children: {
+                    template: {
+                      componentId: 'fruit-checkbox',
+                      dataBinding: 'fruits',
+                    },
+                  },
+                  alignment: 'start',
+                },
+              },
+            },
+            {
+              id: 'fruit-checkbox',
+              component: {
+                CheckBox: {
+                  label: { path: 'name' },
+                  value: { path: 'selected' },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        dataModelUpdate: {
+          surfaceId: 'main',
+          contents: [
+            {
+              key: 'fruits',
+              valueMap: [
+                {
+                  key: '0',
+                  valueMap: [
+                    { key: 'name', valueString: 'Apple' },
+                    { key: 'selected', valueBoolean: true },
+                  ],
+                },
+                {
+                  key: '1',
+                  valueMap: [
+                    { key: 'name', valueString: 'Banana' },
+                    { key: 'selected', valueBoolean: false },
+                  ],
+                },
+                {
+                  key: '2',
+                  valueMap: [
+                    { key: 'name', valueString: 'Orange' },
+                    { key: 'selected', valueBoolean: true },
+                  ],
+                },
+                {
+                  key: '3',
+                  valueMap: [
+                    { key: 'name', valueString: 'Grape' },
+                    { key: 'selected', valueBoolean: false },
+                  ],
+                },
+                {
+                  key: '4',
+                  valueMap: [
+                    { key: 'name', valueString: 'Strawberry' },
+                    { key: 'selected', valueBoolean: false },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        beginRendering: {
+          surfaceId: 'main',
+          root: 'root',
+        },
+      },
+    ],
+  },
 ]

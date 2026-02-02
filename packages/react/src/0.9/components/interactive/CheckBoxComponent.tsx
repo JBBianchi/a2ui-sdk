@@ -7,6 +7,7 @@ import type { CheckBoxComponentProps } from '@a2ui-sdk/types/0.9/standard-catalo
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useScopeBasePath } from '../../contexts/ScopeContext'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -29,6 +30,7 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
     false
   )
   const { valid, errors } = useValidation(surfaceId, checks)
+  const basePath = useScopeBasePath()
 
   const handleChange = useCallback(
     (newChecked: boolean) => {
@@ -37,7 +39,10 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
     [setChecked]
   )
 
-  const id = `checkbox-${componentId}`
+  // Include basePath in ID to ensure uniqueness in templated lists
+  const id = basePath
+    ? `checkbox-${componentId}-${basePath.replace(/\//g, '-')}`
+    : `checkbox-${componentId}`
 
   // Apply weight as flex-grow if set
   const style = weight ? { flexGrow: weight } : undefined

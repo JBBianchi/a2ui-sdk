@@ -216,6 +216,88 @@ describe('CheckBoxComponent', () => {
     expect(checkbox).not.toBeChecked()
   })
 
+  it('should have unique IDs when rendered in template scope', async () => {
+    const { ScopeProvider } = await import('../../contexts/ScopeContext')
+
+    render(
+      <>
+        <ScopeProvider basePath="/fruits/0">
+          <CheckBoxComponent
+            surfaceId="surface-1"
+            componentId="fruit-checkbox"
+            label={{ literalString: 'Apple' }}
+            value={{ path: 'selected' }}
+          />
+        </ScopeProvider>
+        <ScopeProvider basePath="/fruits/1">
+          <CheckBoxComponent
+            surfaceId="surface-1"
+            componentId="fruit-checkbox"
+            label={{ literalString: 'Orange' }}
+            value={{ path: 'selected' }}
+          />
+        </ScopeProvider>
+      </>,
+      { wrapper }
+    )
+
+    const checkboxes = screen.getAllByRole('checkbox')
+    expect(checkboxes).toHaveLength(2)
+
+    // Verify unique IDs
+    const checkbox1 = checkboxes[0]
+    const checkbox2 = checkboxes[1]
+    expect(checkbox1).toHaveAttribute('id')
+    expect(checkbox2).toHaveAttribute('id')
+    expect(checkbox1.getAttribute('id')).not.toBe(checkbox2.getAttribute('id'))
+  })
+
+  it('should toggle correct checkbox when clicking label in template scope', async () => {
+    const user = userEvent.setup()
+    const { ScopeProvider } = await import('../../contexts/ScopeContext')
+
+    render(
+      <>
+        <ScopeProvider basePath="/fruits/0">
+          <CheckBoxComponent
+            surfaceId="surface-1"
+            componentId="fruit-checkbox"
+            label={{ literalString: 'Apple' }}
+            value={{ path: 'selected' }}
+          />
+        </ScopeProvider>
+        <ScopeProvider basePath="/fruits/1">
+          <CheckBoxComponent
+            surfaceId="surface-1"
+            componentId="fruit-checkbox"
+            label={{ literalString: 'Orange' }}
+            value={{ path: 'selected' }}
+          />
+        </ScopeProvider>
+      </>,
+      { wrapper }
+    )
+
+    const checkboxes = screen.getAllByRole('checkbox')
+    expect(checkboxes).toHaveLength(2)
+
+    // Click on "Orange" label
+    const orangeLabel = screen.getByText('Orange')
+    await user.click(orangeLabel)
+
+    // Verify only the second checkbox (Orange) is checked
+    expect(checkboxes[0]).not.toBeChecked()
+    expect(checkboxes[1]).toBeChecked()
+
+    // Click on "Apple" label
+    const appleLabel = screen.getByText('Apple')
+    await user.click(appleLabel)
+
+    // Verify both checkboxes are now checked
+    expect(checkboxes[0]).toBeChecked()
+    expect(checkboxes[1]).toBeChecked()
+  })
+
   it('should have correct displayName', () => {
     expect(CheckBoxComponent.displayName).toBe('A2UI.CheckBox')
   })
