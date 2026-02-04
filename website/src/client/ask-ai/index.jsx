@@ -62,7 +62,7 @@ function AskAI() {
       project="a2ui-sdk"
       // apiUrl="http://localhost:3000/api/stream"
       // apiUrl="https://open-ask-ai.vercel.app/api/stream"
-      apiUrl="https://ask-ai.shenwei.xyz"
+      apiUrl="https://ask-ai.shenwei.xyz/api/stream"
       texts={texts}
       exampleQuestions={exampleQuestions}
     />

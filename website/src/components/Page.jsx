@@ -8,7 +8,7 @@ export default function Page({ title, meta, children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{title || 'A2UI SDK'}</title>
+        <title>{title || site.title}</title>
         {meta &&
           Object.entries(meta).map(
             ([name, content]) =>
