@@ -59,8 +59,10 @@ function AskAI() {
   return (
     <AskAIWidget
       theme={theme}
-      projectId="a2ui-sdk"
-      apiUrl="https://lab.shenwei.xyz"
+      project="a2ui-sdk"
+      // apiUrl="https://lab.shenwei.xyz"
+      // apiUrl="http://localhost:3000/api/stream"
+      apiUrl="https://open-ask-ai.vercel.app/api/stream"
       texts={texts}
       exampleQuestions={exampleQuestions}
     />
