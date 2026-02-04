@@ -20,10 +20,10 @@ export function AskAI({ theme }: AskAIProps) {
   return (
     <AskAIWidget
       theme={theme}
-      // apiUrl="https://lab.shenwei.xyz"
-      // apiUrl="http://localhost:3000/api/stream"
-      apiUrl="https://open-ask-ai.vercel.app/api/stream"
       project="a2ui-sdk"
+      // apiUrl="http://localhost:3000/api/stream"
+      // apiUrl="https://open-ask-ai.vercel.app/api/stream"
+      apiUrl="https://ask-ai.shenwei.xyz"
       texts={texts}
       exampleQuestions={exampleQuestions}
     />
