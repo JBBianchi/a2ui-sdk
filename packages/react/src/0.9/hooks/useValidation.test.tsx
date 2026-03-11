@@ -9,7 +9,7 @@ import { ScopeProvider } from '../contexts/ScopeContext'
 import { useValidation } from './useValidation'
 import { useRef, type ReactNode } from 'react'
 import type { CheckRule } from '@a2ui-sdk/types/0.9'
-import type { ValidationFunction } from '@a2ui-sdk/utils/0.9'
+import { FunctionRegistry } from '@a2ui-sdk/utils/0.9'
 
 /**
  * Setup component that creates a surface with data.
@@ -28,7 +28,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1')
+    ctx.createSurface(surfaceId, 'catalog-1', 'root')
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
 
@@ -71,13 +71,11 @@ describe('useValidation', () => {
     it('should return valid when all checks pass', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: '/name' } },
+          condition: { call: 'required', args: { value: { path: '/name' } } },
           message: 'Name is required',
         },
         {
-          call: 'email',
-          args: { value: { path: '/email' } },
+          condition: { call: 'email', args: { value: { path: '/email' } } },
           message: 'Invalid email',
         },
       ]
@@ -110,8 +108,7 @@ describe('useValidation', () => {
     it('should return invalid when checks fail', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: '/name' } },
+          condition: { call: 'required', args: { value: { path: '/name' } } },
           message: 'Name is required',
         },
       ]
@@ -143,8 +140,7 @@ describe('useValidation', () => {
     it('should resolve relative paths using basePath from scope', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: 'name' } }, // Relative path
+          condition: { call: 'required', args: { value: { path: 'name' } } },
           message: 'Item name required',
         },
       ]
@@ -181,8 +177,7 @@ describe('useValidation', () => {
     it('should fail validation when scoped data is missing', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: 'name' } }, // Relative path
+          condition: { call: 'required', args: { value: { path: 'name' } } },
           message: 'Item name required',
         },
       ]
@@ -224,18 +219,21 @@ describe('useValidation', () => {
     it('should collect all validation errors', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: '/username' } },
+          condition: {
+            call: 'required',
+            args: { value: { path: '/username' } },
+          },
           message: 'Username required',
         },
         {
-          call: 'email',
-          args: { value: { path: '/email' } },
+          condition: { call: 'email', args: { value: { path: '/email' } } },
           message: 'Invalid email',
         },
         {
-          call: 'length',
-          args: { value: { path: '/password' }, min: 8 },
+          condition: {
+            call: 'length',
+            args: { value: { path: '/password' }, min: 8 },
+          },
           message: 'Password too short',
         },
       ]
@@ -279,20 +277,25 @@ describe('useValidation', () => {
     it('should support custom validation functions', () => {
       const checks: CheckRule[] = [
         {
-          call: 'customCheck',
-          args: { value: { path: '/value' } },
+          condition: {
+            call: 'customCheck',
+            args: { value: { path: '/value' } },
+          },
           message: 'Custom check failed',
         },
       ]
 
-      const customFunctions: Record<string, ValidationFunction> = {
-        customCheck: ({ value }: Record<string, unknown>) => {
-          return value === 'valid'
+      const customRegistry = new FunctionRegistry()
+      customRegistry.register({
+        name: 'customCheck',
+        returnType: 'boolean',
+        execute(args: Record<string, unknown>) {
+          return args.value === 'valid'
         },
-      }
+      })
 
       function TestComponent() {
-        const result = useValidation('main', checks, customFunctions)
+        const result = useValidation('main', checks, customRegistry)
         return (
           <div>
             <span data-testid="valid">{result.valid ? 'yes' : 'no'}</span>
@@ -317,8 +320,7 @@ describe('useValidation', () => {
     it('should update validation when data model changes', () => {
       const checks: CheckRule[] = [
         {
-          call: 'required',
-          args: { value: { path: '/name' } },
+          condition: { call: 'required', args: { value: { path: '/name' } } },
           message: 'Name required',
         },
       ]
@@ -362,22 +364,17 @@ describe('useValidation', () => {
   })
 
   describe('logical operators', () => {
-    it('should support AND logic', () => {
+    it('should support AND logic via separate checks', () => {
+      // With the new CheckRule format, AND is achieved by having multiple checks
+      // (all must pass). Each check uses { condition: FunctionCall, message }.
       const checks: CheckRule[] = [
         {
-          and: [
-            {
-              call: 'required',
-              args: { value: { path: '/name' } },
-              message: 'Name required',
-            },
-            {
-              call: 'required',
-              args: { value: { path: '/email' } },
-              message: 'Email required',
-            },
-          ],
-          message: 'Both name and email are required',
+          condition: { call: 'required', args: { value: { path: '/name' } } },
+          message: 'Name required',
+        },
+        {
+          condition: { call: 'required', args: { value: { path: '/email' } } },
+          message: 'Email required',
         },
       ]
 
@@ -406,21 +403,11 @@ describe('useValidation', () => {
       expect(screen.getByTestId('valid')).toHaveTextContent('no')
     })
 
-    it('should support OR logic', () => {
+    it('should support OR logic via path binding', () => {
+      // OR logic: condition is a path that resolves to a truthy value
       const checks: CheckRule[] = [
         {
-          or: [
-            {
-              call: 'required',
-              args: { value: { path: '/phone' } },
-              message: 'Phone required',
-            },
-            {
-              call: 'required',
-              args: { value: { path: '/email' } },
-              message: 'Email required',
-            },
-          ],
+          condition: { path: '/hasContact' },
           message: 'Either phone or email is required',
         },
       ]
@@ -437,16 +424,13 @@ describe('useValidation', () => {
 
       render(
         <SurfaceProvider>
-          <SurfaceSetup
-            surfaceId="main"
-            dataModel={{ phone: '', email: 'alice@example.com' }}
-          >
+          <SurfaceSetup surfaceId="main" dataModel={{ hasContact: true }}>
             <TestComponent />
           </SurfaceSetup>
         </SurfaceProvider>
       )
 
-      // Should be valid because email is present
+      // Should be valid because hasContact is true
       expect(screen.getByTestId('valid')).toHaveTextContent('yes')
     })
   })

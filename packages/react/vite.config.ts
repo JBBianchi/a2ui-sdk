@@ -34,11 +34,17 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: (id) =>
-        id === 'react' ||
-        id === 'react-dom' ||
-        id === 'react/jsx-runtime' ||
-        (!id.startsWith('.') && !id.startsWith('/') && !id.startsWith('@/')),
+      external: (id, importer) =>
+        // Don't externalize entry points (no importer) or resolved absolute paths
+        importer == null
+          ? false
+          : id === 'react' ||
+            id === 'react-dom' ||
+            id === 'react/jsx-runtime' ||
+            (!id.startsWith('.') &&
+              !id.startsWith('/') &&
+              !id.startsWith('@/') &&
+              !/^[A-Za-z]:/.test(id)),
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',

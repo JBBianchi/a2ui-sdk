@@ -6,7 +6,7 @@
  * - Path bindings: `{"path": "/absolute"}` or `{"path": "relative"}`
  */
 
-import { useMemo, useCallback } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import type {
   DynamicValue,
   DynamicString,
@@ -15,10 +15,39 @@ import type {
 } from '@a2ui-sdk/types/0.9'
 import { useSurfaceContext } from '../contexts/SurfaceContext'
 import { useScope } from '../contexts/ScopeContext'
-import { resolveValue, resolveString, isPathBinding } from '@a2ui-sdk/utils/0.9'
+import { useFunctionRegistry } from '../contexts/FunctionRegistryContext'
+import {
+  resolveValue,
+  resolveString,
+  isPathBinding,
+  resolvePath,
+} from '@a2ui-sdk/utils/0.9'
+
+/**
+ * Computes the subscription path for a given source and basePath.
+ * Returns the resolved absolute path for path bindings, or '/' as fallback.
+ */
+function getSubscriptionPath(
+  source: FormBindableValue | DynamicString | undefined | null,
+  basePath: string | null
+): string {
+  if (isPathBinding(source)) {
+    return resolvePath(source.path, basePath)
+  }
+  return '/'
+}
+
+/** No-op subscribe for when DataStore is not available */
+const noopSubscribe: (cb: () => void) => () => void = () => () => {}
+
+/** Stable empty data model for non-existent surfaces */
+const EMPTY_DATA_MODEL: DataModel = {}
 
 /**
  * Resolves a DynamicValue to its actual value.
+ *
+ * Uses useSyncExternalStore with the DataStore for granular re-rendering
+ * when available, falling back to snapshot-based resolution otherwise.
  *
  * @param surfaceId - The surface ID for data model lookup
  * @param source - The dynamic value (literal or path binding)
@@ -38,13 +67,45 @@ export function useDataBinding<T = unknown>(
   source: DynamicValue | undefined,
   defaultValue?: T
 ): T {
-  const { getDataModel } = useSurfaceContext()
+  const { getDataModel, getDataStore } = useSurfaceContext()
   const { basePath } = useScope()
+  const registry = useFunctionRegistry()
+  const dataStore = getDataStore(surfaceId)
 
-  return useMemo(() => {
-    const dataModel = getDataModel(surfaceId)
-    return resolveValue<T>(source, dataModel, basePath, defaultValue)
-  }, [getDataModel, surfaceId, source, basePath, defaultValue])
+  const subPath = getSubscriptionPath(source, basePath)
+
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      if (!dataStore) return () => {}
+      return dataStore.subscribe(subPath, cb)
+    },
+    [dataStore, subPath]
+  )
+
+  const getSnapshot = useCallback(() => {
+    const dataModel = dataStore ? dataStore.getData() : getDataModel(surfaceId)
+    return resolveValue<T>(
+      source,
+      dataModel,
+      basePath,
+      defaultValue,
+      registry ?? undefined
+    )
+  }, [
+    dataStore,
+    getDataModel,
+    surfaceId,
+    source,
+    basePath,
+    defaultValue,
+    registry,
+  ])
+
+  return useSyncExternalStore(
+    dataStore ? subscribe : noopSubscribe,
+    getSnapshot,
+    getSnapshot
+  )
 }
 
 /**
@@ -60,13 +121,45 @@ export function useStringBinding(
   source: DynamicString | undefined,
   defaultValue = ''
 ): string {
-  const { getDataModel } = useSurfaceContext()
+  const { getDataModel, getDataStore } = useSurfaceContext()
   const { basePath } = useScope()
+  const registry = useFunctionRegistry()
+  const dataStore = getDataStore(surfaceId)
 
-  return useMemo(() => {
-    const dataModel = getDataModel(surfaceId)
-    return resolveString(source, dataModel, basePath, defaultValue)
-  }, [getDataModel, surfaceId, source, basePath, defaultValue])
+  const subPath = getSubscriptionPath(source, basePath)
+
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      if (!dataStore) return () => {}
+      return dataStore.subscribe(subPath, cb)
+    },
+    [dataStore, subPath]
+  )
+
+  const getSnapshot = useCallback(() => {
+    const dataModel = dataStore ? dataStore.getData() : getDataModel(surfaceId)
+    return resolveString(
+      source,
+      dataModel,
+      basePath,
+      defaultValue,
+      registry ?? undefined
+    )
+  }, [
+    dataStore,
+    getDataModel,
+    surfaceId,
+    source,
+    basePath,
+    defaultValue,
+    registry,
+  ])
+
+  return useSyncExternalStore(
+    dataStore ? subscribe : noopSubscribe,
+    getSnapshot,
+    getSnapshot
+  )
 }
 
 /**
@@ -77,11 +170,33 @@ export function useStringBinding(
  * @returns The data model for this surface
  */
 export function useDataModel(surfaceId: string): DataModel {
-  const { getDataModel } = useSurfaceContext()
+  const { getDataModel, getDataStore } = useSurfaceContext()
+  const dataStore = getDataStore(surfaceId)
 
-  return useMemo(() => {
-    return getDataModel(surfaceId)
-  }, [getDataModel, surfaceId])
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      if (!dataStore) return () => {}
+      return dataStore.subscribe('/', cb)
+    },
+    [dataStore]
+  )
+
+  const getSnapshot = useCallback(() => {
+    if (dataStore) return dataStore.getData()
+    const model = getDataModel(surfaceId)
+    // Return stable reference for empty models to avoid infinite loops
+    // when useSyncExternalStore compares snapshots with Object.is
+    if (model && typeof model === 'object' && Object.keys(model).length === 0) {
+      return EMPTY_DATA_MODEL
+    }
+    return model
+  }, [dataStore, getDataModel, surfaceId])
+
+  return useSyncExternalStore(
+    dataStore ? subscribe : noopSubscribe,
+    getSnapshot,
+    getSnapshot
+  )
 }
 
 /**
@@ -112,13 +227,45 @@ export function useFormBinding<T = unknown>(
   source: FormBindableValue | undefined,
   defaultValue?: T
 ): [T, (value: T) => void] {
-  const { getDataModel, setDataValue } = useSurfaceContext()
+  const { getDataModel, setDataValue, getDataStore } = useSurfaceContext()
   const { basePath } = useScope()
+  const registry = useFunctionRegistry()
+  const dataStore = getDataStore(surfaceId)
 
-  const value = useMemo(() => {
-    const dataModel = getDataModel(surfaceId)
-    return resolveValue<T>(source, dataModel, basePath, defaultValue)
-  }, [getDataModel, surfaceId, source, basePath, defaultValue])
+  const subPath = getSubscriptionPath(source, basePath)
+
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      if (!dataStore) return () => {}
+      return dataStore.subscribe(subPath, cb)
+    },
+    [dataStore, subPath]
+  )
+
+  const getSnapshot = useCallback(() => {
+    const dataModel = dataStore ? dataStore.getData() : getDataModel(surfaceId)
+    return resolveValue<T>(
+      source,
+      dataModel,
+      basePath,
+      defaultValue,
+      registry ?? undefined
+    )
+  }, [
+    dataStore,
+    getDataModel,
+    surfaceId,
+    source,
+    basePath,
+    defaultValue,
+    registry,
+  ])
+
+  const value = useSyncExternalStore(
+    dataStore ? subscribe : noopSubscribe,
+    getSnapshot,
+    getSnapshot
+  )
 
   const setValue = useCallback(
     (newValue: T) => {

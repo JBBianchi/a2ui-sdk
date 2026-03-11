@@ -15,6 +15,13 @@ export interface UnknownComponentProps {
   componentType: string
 }
 
+function getNodeEnv(): string | undefined {
+  const nodeProcess = (
+    globalThis as { process?: { env?: { NODE_ENV?: string } } }
+  ).process
+  return nodeProcess?.env?.NODE_ENV
+}
+
 /**
  * Fallback component for unknown types.
  *
@@ -25,8 +32,8 @@ export function UnknownComponent({
   componentId,
   componentType,
 }: A2UIComponentProps<UnknownComponentProps>) {
-  // Log warning in both dev and production
-  if (process.env.NODE_ENV === 'development') {
+  // Log warning in development
+  if (getNodeEnv() === 'development') {
     console.warn(
       `[A2UI 0.9] Unknown component type "${componentType}" (id: ${componentId}). ` +
         'Make sure the component type is correct or provide a custom component.'

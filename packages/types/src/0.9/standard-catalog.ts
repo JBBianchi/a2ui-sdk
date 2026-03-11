@@ -6,6 +6,7 @@ import type {
   DynamicNumber,
   DynamicString,
   DynamicStringList,
+  CatalogComponentCommon,
 } from './index.js'
 
 // ============ Display Component Props ============
@@ -57,7 +58,7 @@ export interface TextComponentProps {
  */
 export interface ImageComponentProps {
   url: DynamicString
-  fit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down'
+  fit?: 'contain' | 'cover' | 'fill' | 'none' | 'scaleDown'
   variant?:
     | 'icon'
     | 'avatar'
@@ -152,7 +153,7 @@ export interface ModalComponentProps {
 /**
  * Checkable props mixin for validation.
  */
-export interface CheckableProps {
+export interface CheckableProps extends CatalogComponentCommon {
   checks?: CheckRule[]
 }
 
@@ -161,7 +162,7 @@ export interface CheckableProps {
  */
 export interface ButtonComponentProps extends CheckableProps {
   child: string
-  primary?: boolean
+  variant?: 'default' | 'primary' | 'borderless'
   action: Action
 }
 
@@ -172,6 +173,7 @@ export interface TextFieldComponentProps extends CheckableProps {
   label: DynamicString
   value?: DynamicString
   variant?: 'longText' | 'number' | 'shortText' | 'obscured'
+  validationRegexp?: string
 }
 
 /**
@@ -190,6 +192,8 @@ export interface ChoicePickerComponentProps extends CheckableProps {
   variant?: 'multipleSelection' | 'mutuallyExclusive'
   options: ChoiceOption[]
   value: DynamicStringList
+  displayStyle?: 'checkbox' | 'chips'
+  filterable?: boolean
 }
 
 /**
@@ -197,7 +201,7 @@ export interface ChoicePickerComponentProps extends CheckableProps {
  */
 export interface SliderComponentProps extends CheckableProps {
   label?: DynamicString
-  min: number
+  min?: number
   max: number
   value: DynamicNumber
 }
@@ -209,6 +213,7 @@ export interface DateTimeInputComponentProps extends CheckableProps {
   value: DynamicString
   enableDate?: boolean
   enableTime?: boolean
-  outputFormat?: string
+  min?: DynamicString
+  max?: DynamicString
   label?: DynamicString
 }

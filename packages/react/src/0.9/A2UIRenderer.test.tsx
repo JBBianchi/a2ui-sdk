@@ -43,10 +43,12 @@ function TestA2UIProvider({
 function SurfaceSetup({
   surfaceId,
   components,
+  rootId = 'root',
   children,
 }: {
   surfaceId: string
   components: ComponentDefinition[]
+  rootId?: string
   children: ReactNode
 }) {
   const ctx = useSurfaceContext()
@@ -55,7 +57,7 @@ function SurfaceSetup({
   // Set up surface synchronously during render for testing
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1')
+    ctx.createSurface(surfaceId, 'catalog-1', rootId)
     ctx.updateComponents(surfaceId, components)
   }
 
@@ -79,7 +81,7 @@ function MultiSurfaceSetup({
   if (setupDone.current === null) {
     setupDone.current = true
     for (const { surfaceId, components } of surfaces) {
-      ctx.createSurface(surfaceId, 'catalog-1')
+      ctx.createSurface(surfaceId, 'catalog-1', 'root')
       ctx.updateComponents(surfaceId, components)
     }
   }
@@ -249,11 +251,12 @@ describe('A2UIRenderer', () => {
       expect(screen.getByText('Root')).toBeInTheDocument()
     })
 
-    it('should find root component by analyzing child references', () => {
+    it('should use explicit root component ID from createSurface', () => {
       render(
         <TestA2UIProvider testComponents={testComponents}>
           <SurfaceSetup
             surfaceId="main"
+            rootId="container"
             components={[
               { id: 'container', component: 'Column', children: ['child-1'] },
               { id: 'child-1', component: 'Text', text: 'Child' },
@@ -264,7 +267,7 @@ describe('A2UIRenderer', () => {
         </TestA2UIProvider>
       )
 
-      // Should render the container (parent) as root
+      // Should render the container as root (explicit root ID)
       expect(screen.getByTestId('column-container')).toBeInTheDocument()
       expect(screen.getByText('Child')).toBeInTheDocument()
     })

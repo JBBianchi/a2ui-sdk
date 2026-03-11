@@ -1,9 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a2ui.dev/specification/0.9/server_to_client.json",
+  "$id": "https://a2ui.org/specification/v0_9/server_to_client.json",
   "title": "A2UI Message Schema",
   "description": "Describes a JSON payload for an A2UI (Agent to UI) message, which is used to dynamically construct and update user interfaces.",
   "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Optional protocol version string (e.g. '0.9')."
+    }
+  },
   "oneOf": [
     { "$ref": "#/$defs/CreateSurfaceMessage" },
     { "$ref": "#/$defs/UpdateComponentsMessage" },
@@ -26,9 +32,27 @@
               "title": "Catalog ID",
               "description": "A string that uniquely identifies this catalog. It is recommended to prefix this with an internet domain that you own, to avoid conflicts e.g. mycompany.com:somecatalog'.",
               "type": "string"
+            },
+            "root": {
+              "type": "string",
+              "description": "The component ID to use as the root of the component tree for this surface."
+            },
+            "theme": {
+              "type": "object",
+              "description": "Optional theme configuration for this surface.",
+              "properties": {
+                "primaryColor": { "type": "string" },
+                "iconUrl": { "type": "string", "format": "uri" },
+                "agentDisplayName": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "sendDataModel": {
+              "type": "boolean",
+              "description": "When true, the client includes the surface data model in action payloads."
             }
           },
-          "required": ["surfaceId", "catalogId"],
+          "required": ["surfaceId", "catalogId", "root"],
           "additionalProperties": false
         }
       },
@@ -52,7 +76,7 @@
               "description": "A list containing all UI components for the surface.",
               "minItems": 1,
               "items": {
-                "$ref": "standard_catalog.json#/$defs/anyComponent"
+                "$ref": "basic_catalog.json#/$defs/anyComponent"
               }
             }
           },

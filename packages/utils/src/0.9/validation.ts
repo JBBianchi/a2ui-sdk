@@ -1,17 +1,21 @@
 /**
  * Validation utilities for A2UI 0.9 Renderer.
  *
- * Implements validation functions and LogicExpression evaluation
- * for the `checks` property on input components and Buttons.
+ * Implements validation functions and CheckRule evaluation
+ * using condition-based DynamicBoolean for the `checks` property
+ * on input components and Buttons.
  */
 
 import type {
   CheckRule,
+  DynamicBoolean,
   DynamicValue,
   DataModel,
+  FunctionCall,
   ValidationResult,
 } from '@a2ui-sdk/types/0.9'
 import { resolveValue } from './dataBinding.js'
+import type { FunctionRegistry } from './functions/index.js'
 
 // ============ Validation Functions ============
 
@@ -40,7 +44,6 @@ export const validationFunctions: Record<string, ValidationFunction> = {
    */
   email: ({ value }) => {
     if (typeof value !== 'string') return false
-    // Simple email validation - matches most valid emails
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(value)
   },
@@ -54,7 +57,6 @@ export const validationFunctions: Record<string, ValidationFunction> = {
     try {
       return new RegExp(pattern).test(value)
     } catch {
-      // Invalid regex pattern
       return false
     }
   },
@@ -82,7 +84,7 @@ export const validationFunctions: Record<string, ValidationFunction> = {
   },
 }
 
-// ============ Logic Expression Evaluation ============
+// ============ DynamicBoolean Evaluation ============
 
 /**
  * Context for evaluating expressions.
@@ -90,7 +92,23 @@ export const validationFunctions: Record<string, ValidationFunction> = {
 export interface EvaluationContext {
   dataModel: DataModel
   basePath: string | null
+  registry?: FunctionRegistry
+  /** @deprecated Use registry instead */
   functions?: Record<string, ValidationFunction>
+}
+
+/**
+ * Helper to check if a value is a FunctionCall.
+ */
+function isFunctionCall(value: DynamicBoolean): value is FunctionCall {
+  return typeof value === 'object' && value !== null && 'call' in value
+}
+
+/**
+ * Helper to check if a value is a path binding.
+ */
+function isPathBinding(value: DynamicBoolean): value is { path: string } {
+  return typeof value === 'object' && value !== null && 'path' in value
 }
 
 /**
@@ -99,39 +117,85 @@ export interface EvaluationContext {
 export function resolveArgs(
   args: Record<string, DynamicValue> | undefined,
   dataModel: DataModel,
-  basePath: string | null
+  basePath: string | null,
+  registry?: FunctionRegistry
 ): Record<string, unknown> {
   if (!args) return {}
 
   const resolved: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(args)) {
-    resolved[key] = resolveValue(value, dataModel, basePath, undefined)
+    resolved[key] = resolveValue(
+      value,
+      dataModel,
+      basePath,
+      undefined,
+      registry
+    )
   }
   return resolved
 }
 
 /**
- * Evaluates a function call.
+ * Evaluates a DynamicBoolean condition.
+ * Supports: literal boolean, path binding, FunctionCall.
  */
-export function evaluateFunctionCall(
-  call: string,
-  args: Record<string, DynamicValue> | undefined,
+export function evaluateDynamicBoolean(
+  condition: DynamicBoolean,
   context: EvaluationContext
 ): boolean {
-  const { dataModel, basePath, functions = validationFunctions } = context
+  const { dataModel, basePath, registry } = context
 
-  const fn = functions[call]
-  if (!fn) {
-    console.warn(`[A2UI] Unknown validation function: ${call}`)
-    return true // Unknown functions pass by default
+  // Literal boolean
+  if (typeof condition === 'boolean') {
+    return condition
   }
 
-  const resolvedArgs = resolveArgs(args, dataModel, basePath)
-  return fn(resolvedArgs)
+  // Path binding
+  if (isPathBinding(condition)) {
+    const value = resolveValue(
+      condition,
+      dataModel,
+      basePath,
+      undefined,
+      registry
+    )
+    return Boolean(value)
+  }
+
+  // FunctionCall
+  if (isFunctionCall(condition)) {
+    if (registry) {
+      const resolvedArgs = resolveArgs(
+        condition.args,
+        dataModel,
+        basePath,
+        registry
+      )
+      const result = registry.execute(
+        condition.call,
+        resolvedArgs,
+        dataModel,
+        basePath
+      )
+      return Boolean(result)
+    }
+    // Fallback to legacy validation functions
+    const { functions = validationFunctions } = context
+    const fn = functions[condition.call]
+    if (!fn) {
+      console.warn(`[A2UI] Unknown validation function: ${condition.call}`)
+      return true
+    }
+    const resolvedArgs = resolveArgs(condition.args, dataModel, basePath)
+    return fn(resolvedArgs)
+  }
+
+  // Unknown condition type - default to pass
+  return true
 }
 
 /**
- * Evaluates a CheckRule (which is also a LogicExpression).
+ * Evaluates a CheckRule by resolving its condition as a DynamicBoolean.
  *
  * @param rule - The check rule to evaluate
  * @param context - Evaluation context with data model and scope
@@ -141,35 +205,7 @@ export function evaluateCheckRule(
   rule: CheckRule,
   context: EvaluationContext
 ): boolean {
-  // Handle logical operators
-  if ('and' in rule && rule.and) {
-    return rule.and.every((r) => evaluateCheckRule(r, context))
-  }
-
-  if ('or' in rule && rule.or) {
-    return rule.or.some((r) => evaluateCheckRule(r, context))
-  }
-
-  if ('not' in rule && rule.not) {
-    return !evaluateCheckRule(rule.not, context)
-  }
-
-  // Handle boolean constants
-  if ('true' in rule && rule.true === true) {
-    return true
-  }
-
-  if ('false' in rule && rule.false === false) {
-    return false
-  }
-
-  // Handle function call
-  if ('call' in rule && rule.call) {
-    return evaluateFunctionCall(rule.call, rule.args, context)
-  }
-
-  // No valid expression found - default to pass
-  return true
+  return evaluateDynamicBoolean(rule.condition, context)
 }
 
 /**
@@ -178,14 +214,14 @@ export function evaluateCheckRule(
  * @param checks - Array of check rules
  * @param dataModel - The data model for value resolution
  * @param basePath - The current scope base path (for relative paths)
- * @param functions - Optional custom validation functions
+ * @param registry - Optional function registry for FunctionCall evaluation
  * @returns ValidationResult with valid flag and error messages
  */
 export function evaluateChecks(
   checks: CheckRule[] | undefined,
   dataModel: DataModel,
   basePath: string | null,
-  functions?: Record<string, ValidationFunction>
+  registry?: FunctionRegistry
 ): ValidationResult {
   if (!checks || checks.length === 0) {
     return { valid: true, errors: [] }
@@ -194,7 +230,7 @@ export function evaluateChecks(
   const context: EvaluationContext = {
     dataModel,
     basePath,
-    functions: functions ?? validationFunctions,
+    registry,
   }
 
   const errors: string[] = []

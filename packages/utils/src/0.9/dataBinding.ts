@@ -14,7 +14,7 @@ import type {
   FormBindableValue,
 } from '@a2ui-sdk/types/0.9'
 import { getValueByPath, resolvePath } from './pathUtils.js'
-import { interpolate } from '@a2ui-sdk/utils/0.9'
+import type { FunctionRegistry } from './functions/index.js'
 
 /**
  * Type guard to check if a value is a path binding.
@@ -89,7 +89,8 @@ export function resolveValue<T = unknown>(
   value: FormBindableValue | undefined | null,
   dataModel: DataModel,
   basePath: string | null = null,
-  defaultValue?: T
+  defaultValue?: T,
+  registry?: FunctionRegistry
 ): T {
   if (value === undefined || value === null) {
     return defaultValue as T
@@ -105,12 +106,36 @@ export function resolveValue<T = unknown>(
     return result as T
   }
 
-  // Function call - not evaluated here, return default
+  // Function call - evaluate via registry if available
   if (isFunctionCall(value)) {
+    if (registry) {
+      const resolvedArgs: Record<string, unknown> = {}
+      if (value.args) {
+        for (const [key, arg] of Object.entries(value.args)) {
+          resolvedArgs[key] = resolveValue(
+            arg,
+            dataModel,
+            basePath,
+            undefined,
+            registry
+          )
+        }
+      }
+      const result = registry.execute(
+        value.call,
+        resolvedArgs,
+        dataModel,
+        basePath
+      )
+      if (result === undefined) {
+        return defaultValue as T
+      }
+      return result as T
+    }
     return defaultValue as T
   }
 
-  // Literal value
+  // Literal value (including array literals)
   return value as T
 }
 
@@ -141,7 +166,8 @@ export function resolveString(
   value: DynamicString | undefined | null,
   dataModel: DataModel,
   basePath: string | null = null,
-  defaultValue = ''
+  defaultValue = '',
+  registry?: FunctionRegistry
 ): string {
   // Handle undefined/null
   if (value === undefined || value === null) {
@@ -158,14 +184,38 @@ export function resolveString(
     return String(result)
   }
 
-  // Handle function call (not evaluated here)
+  // Handle function call - evaluate via registry if available
   if (isFunctionCall(value)) {
+    if (registry) {
+      const resolvedArgs: Record<string, unknown> = {}
+      if (value.args) {
+        for (const [key, arg] of Object.entries(value.args)) {
+          resolvedArgs[key] = resolveValue(
+            arg,
+            dataModel,
+            basePath,
+            undefined,
+            registry
+          )
+        }
+      }
+      const result = registry.execute(
+        value.call,
+        resolvedArgs,
+        dataModel,
+        basePath
+      )
+      if (result === undefined || result === null) {
+        return defaultValue
+      }
+      return String(result)
+    }
     return defaultValue
   }
 
-  // Handle string literal - perform interpolation
+  // Handle string literal - no auto-interpolation (per spec, interpolation only in formatString)
   if (typeof value === 'string') {
-    return interpolate(value, dataModel, basePath)
+    return value
   }
 
   // Other types (number, boolean) - convert to string

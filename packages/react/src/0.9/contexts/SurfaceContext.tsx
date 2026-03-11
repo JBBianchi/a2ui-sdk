@@ -14,14 +14,16 @@ import {
   useState,
   useMemo,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react'
 import type {
   ComponentDefinition,
   DataModel,
   SurfaceState,
+  ThemeConfig,
 } from '@a2ui-sdk/types/0.9'
-import { setValueByPath } from '@a2ui-sdk/utils/0.9'
+import { setValueByPath, DataStore } from '@a2ui-sdk/utils/0.9'
 
 /**
  * Surface context value interface.
@@ -34,7 +36,13 @@ export interface SurfaceContextValue {
    * Creates a new surface.
    * If the surface already exists, logs an error and ignores.
    */
-  createSurface: (surfaceId: string, catalogId: string) => void
+  createSurface: (
+    surfaceId: string,
+    catalogId: string,
+    root: string,
+    theme?: ThemeConfig,
+    sendDataModel?: boolean
+  ) => void
 
   /** Updates components in a surface (upsert semantics) */
   updateComponents: (
@@ -65,6 +73,9 @@ export interface SurfaceContextValue {
 
   /** Clears all surfaces */
   clearSurfaces: () => void
+
+  /** Gets the DataStore instance for a surface (for useSyncExternalStore) */
+  getDataStore: (surfaceId: string) => DataStore | undefined
 }
 
 /**
@@ -84,27 +95,46 @@ export interface SurfaceProviderProps {
  */
 export function SurfaceProvider({ children }: SurfaceProviderProps) {
   const [surfaces, setSurfaces] = useState<Map<string, SurfaceState>>(new Map())
+  const dataStoresRef = useRef<Map<string, DataStore>>(new Map())
 
-  const createSurface = useCallback((surfaceId: string, catalogId: string) => {
-    setSurfaces((prev) => {
-      if (prev.has(surfaceId)) {
-        console.error(
-          `[A2UI 0.9] Surface "${surfaceId}" already exists. Ignoring createSurface.`
-        )
-        return prev
+  const createSurface = useCallback(
+    (
+      surfaceId: string,
+      catalogId: string,
+      root: string,
+      theme?: ThemeConfig,
+      sendDataModel?: boolean
+    ) => {
+      // Create DataStore eagerly (outside setSurfaces) so subsequent
+      // updateDataModel calls in the same synchronous batch can find it.
+      if (!dataStoresRef.current.has(surfaceId)) {
+        dataStoresRef.current.set(surfaceId, new DataStore({}))
       }
 
-      const next = new Map(prev)
-      next.set(surfaceId, {
-        surfaceId,
-        catalogId,
-        components: new Map(),
-        dataModel: {},
-        created: true,
+      setSurfaces((prev) => {
+        if (prev.has(surfaceId)) {
+          console.error(
+            `[A2UI 0.9] Surface "${surfaceId}" already exists. Ignoring createSurface.`
+          )
+          return prev
+        }
+
+        const next = new Map(prev)
+        next.set(surfaceId, {
+          surfaceId,
+          catalogId,
+          root,
+          components: new Map(),
+          dataModel: {},
+          created: true,
+          theme,
+          sendDataModel,
+        })
+        return next
       })
-      return next
-    })
-  }, [])
+    },
+    []
+  )
 
   const updateComponents = useCallback(
     (surfaceId: string, components: ComponentDefinition[]) => {
@@ -126,7 +156,20 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
         const componentMap = new Map(surface.components)
 
         for (const comp of components) {
-          componentMap.set(comp.id, comp)
+          const existing = componentMap.get(comp.id)
+          if (existing && existing.component !== comp.component) {
+            // Component type changed: replace entirely to reset accumulated state.
+            // Bump _generation so downstream renderers can use it as a React key
+            // to force unmount/remount and discard stale component state.
+            const prevGen =
+              (existing as Record<string, unknown>)._generation ?? 0
+            componentMap.set(comp.id, {
+              ...comp,
+              _generation: (prevGen as number) + 1,
+            })
+          } else {
+            componentMap.set(comp.id, comp)
+          }
         }
 
         next.set(surfaceId, {
@@ -142,6 +185,13 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
 
   const updateDataModel = useCallback(
     (surfaceId: string, path?: string, value?: unknown) => {
+      // Update DataStore (notifies subscribers synchronously)
+      const store = dataStoresRef.current.get(surfaceId)
+      if (store) {
+        const normalizedPath = path ?? '/'
+        store.set(normalizedPath, value)
+      }
+
       setSurfaces((prev) => {
         const surface = prev.get(surfaceId)
 
@@ -174,6 +224,13 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
   )
 
   const deleteSurface = useCallback((surfaceId: string) => {
+    // Dispose DataStore for this surface
+    const store = dataStoresRef.current.get(surfaceId)
+    if (store) {
+      store.dispose()
+      dataStoresRef.current.delete(surfaceId)
+    }
+
     setSurfaces((prev) => {
       const next = new Map(prev)
       next.delete(surfaceId)
@@ -212,8 +269,21 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
   )
 
   const clearSurfaces = useCallback(() => {
+    // Dispose all DataStores
+    for (const store of dataStoresRef.current.values()) {
+      store.dispose()
+    }
+    dataStoresRef.current.clear()
+
     setSurfaces(new Map())
   }, [])
+
+  const getDataStore = useCallback(
+    (surfaceId: string): DataStore | undefined => {
+      return dataStoresRef.current.get(surfaceId)
+    },
+    []
+  )
 
   const value = useMemo<SurfaceContextValue>(
     () => ({
@@ -227,6 +297,7 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
       getDataModel,
       setDataValue,
       clearSurfaces,
+      getDataStore,
     }),
     [
       surfaces,
@@ -239,6 +310,7 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
       getDataModel,
       setDataValue,
       clearSurfaces,
+      getDataStore,
     ]
   )
 

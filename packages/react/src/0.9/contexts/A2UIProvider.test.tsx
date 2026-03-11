@@ -209,7 +209,7 @@ describe('A2UIProvider', () => {
               actionCtx.dispatchAction(
                 'main',
                 'btn-1',
-                { name: 'click' },
+                { event: { name: 'click' } },
                 dataModel
               )
             }

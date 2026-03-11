@@ -20,7 +20,7 @@ export const SliderComponent = memo(function SliderComponent({
   componentId,
   label,
   min = 0,
-  max = 100,
+  max,
   value: valueProp,
   checks,
   weight,

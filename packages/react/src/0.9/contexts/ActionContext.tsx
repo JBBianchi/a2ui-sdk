@@ -19,7 +19,9 @@ import type {
   DynamicValue,
   DataModel,
 } from '@a2ui-sdk/types/0.9'
-import { resolveContext } from '@a2ui-sdk/utils/0.9'
+import { isEventAction, isFunctionCallAction } from '@a2ui-sdk/types/0.9'
+import { resolveContext, resolveValue } from '@a2ui-sdk/utils/0.9'
+import type { FunctionRegistry } from '@a2ui-sdk/utils/0.9'
 
 /**
  * Action context value interface.
@@ -49,13 +51,22 @@ export const ActionContext = createContext<ActionContextValue | null>(null)
 export interface ActionProviderProps {
   /** Callback when an action is dispatched */
   onAction?: ActionHandler
+  /** Function registry for executing functionCall actions */
+  functionRegistry?: FunctionRegistry
+  /** Returns whether a surface has sendDataModel enabled */
+  getSendDataModel?: (surfaceId: string) => boolean
   children: ReactNode
 }
 
 /**
  * Provider component for Action dispatching.
  */
-export function ActionProvider({ onAction, children }: ActionProviderProps) {
+export function ActionProvider({
+  onAction,
+  functionRegistry,
+  getSendDataModel,
+  children,
+}: ActionProviderProps) {
   const dispatchAction = useCallback(
     (
       surfaceId: string,
@@ -64,33 +75,65 @@ export function ActionProvider({ onAction, children }: ActionProviderProps) {
       dataModel: DataModel,
       basePath: string | null = null
     ) => {
-      if (!onAction) {
-        console.warn(
-          '[A2UI 0.9] Action dispatched but no handler is registered'
+      // Handle event actions - dispatch to onAction callback
+      if (isEventAction(action)) {
+        if (!onAction) {
+          console.warn(
+            '[A2UI 0.9] Event action dispatched but no handler is registered'
+          )
+          return
+        }
+
+        const resolvedContext = resolveContext(
+          action.event.context as Record<string, DynamicValue> | undefined,
+          dataModel,
+          basePath
         )
+
+        const payload: ActionPayload = {
+          surfaceId,
+          name: action.event.name,
+          context: resolvedContext,
+          sourceComponentId: componentId,
+          timestamp: new Date().toISOString(),
+        }
+
+        // Attach dataModel if sendDataModel is enabled for this surface
+        if (getSendDataModel?.(surfaceId)) {
+          payload.dataModel = dataModel as Record<string, unknown>
+        }
+
+        onAction(payload)
         return
       }
 
-      // Resolve the action context values
-      const resolvedContext = resolveContext(
-        action.context as Record<string, DynamicValue> | undefined,
-        dataModel,
-        basePath
-      )
+      // Handle functionCall actions - execute locally via function registry
+      if (isFunctionCallAction(action)) {
+        if (!functionRegistry) {
+          console.warn(
+            `[A2UI 0.9] FunctionCall action "${action.functionCall.call}" dispatched but no function registry is available`
+          )
+          return
+        }
 
-      // Create the action payload
-      const payload: ActionPayload = {
-        surfaceId,
-        name: action.name,
-        context: resolvedContext,
-        sourceComponentId: componentId,
-        timestamp: new Date().toISOString(),
+        const fc = action.functionCall
+        const resolvedArgs: Record<string, unknown> = {}
+        if (fc.args) {
+          for (const [key, val] of Object.entries(fc.args)) {
+            resolvedArgs[key] = resolveValue(
+              val,
+              dataModel,
+              basePath,
+              undefined,
+              functionRegistry
+            )
+          }
+        }
+        functionRegistry.execute(fc.call, resolvedArgs, dataModel, basePath)
+        return
       }
-
-      // Call the handler
-      onAction(payload)
     },
-    [onAction]
+    [onAction, functionRegistry, getSendDataModel]
   )
 
   const value = useMemo<ActionContextValue>(

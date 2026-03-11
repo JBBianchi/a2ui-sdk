@@ -10,12 +10,25 @@
 /**
  * A2UI message from server to client.
  * Each message contains exactly one of the four message types.
+ * Optionally includes a protocol version field.
  */
-export type A2UIMessage =
+export type A2UIMessage = {
+  version?: string
+} & (
   | { createSurface: CreateSurfacePayload }
   | { updateComponents: UpdateComponentsPayload }
   | { updateDataModel: UpdateDataModelPayload }
   | { deleteSurface: DeleteSurfacePayload }
+)
+
+/**
+ * Theme configuration for a surface.
+ */
+export interface ThemeConfig {
+  primaryColor?: string
+  iconUrl?: string
+  agentDisplayName?: string
+}
 
 /**
  * CreateSurface message payload - initializes a new Surface.
@@ -23,6 +36,9 @@ export type A2UIMessage =
 export interface CreateSurfacePayload {
   surfaceId: string
   catalogId: string
+  root: string
+  theme?: ThemeConfig
+  sendDataModel?: boolean
 }
 
 /**
@@ -80,6 +96,7 @@ export type DynamicValue =
   | string
   | number
   | boolean
+  | unknown[]
   | { path: string }
   | FunctionCall
 
@@ -96,7 +113,7 @@ export type DynamicNumber = number | { path: string } | FunctionCall
 /**
  * Dynamic boolean value.
  */
-export type DynamicBoolean = boolean | { path: string } | LogicExpression
+export type DynamicBoolean = boolean | { path: string } | FunctionCall
 
 /**
  * Dynamic string list value.
@@ -135,16 +152,11 @@ export type ChildList =
 
 /**
  * Check rule for validation.
+ * Uses condition-based DynamicBoolean evaluation.
  */
 export interface CheckRule {
+  condition: DynamicBoolean
   message: string
-  call?: string
-  args?: Record<string, DynamicValue>
-  and?: CheckRule[]
-  or?: CheckRule[]
-  not?: CheckRule
-  true?: true
-  false?: false
 }
 
 /**
@@ -154,6 +166,16 @@ export interface Checkable {
   checks?: CheckRule[]
 }
 
+// ============ Accessibility ============
+
+/**
+ * Accessibility attributes for components.
+ */
+export interface AccessibilityAttributes {
+  label?: DynamicString
+  description?: DynamicString
+}
+
 // ============ Component Definitions ============
 
 /**
@@ -161,6 +183,13 @@ export interface Checkable {
  */
 export interface ComponentCommon {
   id: string
+  accessibility?: AccessibilityAttributes
+}
+
+/**
+ * Common properties for catalog components (extends ComponentCommon).
+ */
+export interface CatalogComponentCommon {
   /** flex-grow for Row/Column children */
   weight?: number
 }
@@ -194,9 +223,12 @@ export type DataModel = Record<string, unknown>
 export interface SurfaceState {
   surfaceId: string
   catalogId: string
+  root: string
   components: Map<string, ComponentDefinition>
   dataModel: DataModel
   created: boolean
+  theme?: ThemeConfig
+  sendDataModel?: boolean
 }
 
 /**
@@ -219,11 +251,42 @@ export interface ValidationResult {
 // ============ Action Types (Client to Server) ============
 
 /**
- * Action definition (attached to Button components).
+ * Event action variant - dispatches to server via onAction callback.
  */
-export interface Action {
-  name: string
-  context?: Record<string, DynamicValue>
+export interface EventAction {
+  event: {
+    name: string
+    context?: Record<string, DynamicValue>
+  }
+}
+
+/**
+ * FunctionCall action variant - executes locally via function registry.
+ */
+export interface FunctionCallAction {
+  functionCall: FunctionCall
+}
+
+/**
+ * Action definition (attached to Button components).
+ * Discriminated union: either an event (server dispatch) or a functionCall (local execution).
+ */
+export type Action = EventAction | FunctionCallAction
+
+/**
+ * Type guard for event actions.
+ */
+export function isEventAction(action: Action): action is EventAction {
+  return 'event' in action
+}
+
+/**
+ * Type guard for functionCall actions.
+ */
+export function isFunctionCallAction(
+  action: Action
+): action is FunctionCallAction {
+  return 'functionCall' in action
 }
 
 /**
@@ -235,11 +298,29 @@ export interface ActionPayload {
   sourceComponentId: string
   timestamp: string // ISO 8601
   context: Record<string, unknown>
+  dataModel?: Record<string, unknown>
 }
 
 /**
  * Action handler callback type.
  */
 export type ActionHandler = (action: ActionPayload) => void
+
+// ============ Error Types (Client to Server) ============
+
+/**
+ * Error payload for client-to-server error reporting.
+ */
+export interface ErrorPayload {
+  code: string
+  surfaceId: string
+  path?: string
+  message: string
+}
+
+/**
+ * Error handler callback type.
+ */
+export type ErrorHandler = (error: ErrorPayload) => void
 
 export * as StandardCatalog from './standard-catalog.js'

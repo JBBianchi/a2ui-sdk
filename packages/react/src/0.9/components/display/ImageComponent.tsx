@@ -16,7 +16,7 @@ const fitStyles: Record<string, string> = {
   cover: 'object-cover',
   fill: 'object-fill',
   none: 'object-none',
-  'scale-down': 'object-scale-down',
+  scaleDown: 'object-scale-down',
 }
 
 /**

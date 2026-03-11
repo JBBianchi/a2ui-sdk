@@ -52,7 +52,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1')
+    ctx.createSurface(surfaceId, 'catalog-1', 'root')
     ctx.updateComponents(surfaceId, components)
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
@@ -107,9 +107,9 @@ describe('Display Components', () => {
       expect(screen.getByText('Hello from Data')).toBeInTheDocument()
     })
 
-    it('should render text with interpolation', () => {
+    it('should render text from path binding', () => {
       const components: ComponentDefinition[] = [
-        { id: 'text-1', component: 'Text', text: 'Hello, ${/user/name}!' },
+        { id: 'text-1', component: 'Text', text: { path: '/user/name' } },
       ]
 
       render(
@@ -124,7 +124,7 @@ describe('Display Components', () => {
         </TestProvider>
       )
 
-      expect(screen.getByText('Hello, Alice!')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
     })
   })
 
@@ -275,7 +275,7 @@ describe('Interactive Components', () => {
           id: 'btn-1',
           component: 'Button',
           child: 'btn-text',
-          action: { name: 'click' },
+          action: { event: { name: 'click' } },
         },
         { id: 'btn-text', component: 'Text', text: 'Click Me' },
       ]
@@ -300,7 +300,7 @@ describe('Interactive Components', () => {
           id: 'btn-1',
           component: 'Button',
           child: 'btn-text',
-          action: { name: 'submit', context: { value: 'test' } },
+          action: { event: { name: 'submit', context: { value: 'test' } } },
         },
         { id: 'btn-text', component: 'Text', text: 'Submit' },
       ]
