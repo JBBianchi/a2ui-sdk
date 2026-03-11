@@ -44,7 +44,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1')
+    ctx.createSurface(surfaceId, 'catalog-1', 'root')
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
 
@@ -86,8 +86,7 @@ describe('useDispatchAction', () => {
           data-testid="dispatch"
           onClick={() =>
             dispatchAction('main', 'btn-1', {
-              name: 'click',
-              context: { key: 'value' },
+              event: { name: 'click', context: { key: 'value' } },
             })
           }
         >
@@ -128,10 +127,12 @@ describe('useDispatchAction', () => {
           data-testid="dispatch"
           onClick={() =>
             dispatchAction('main', 'btn-1', {
-              name: 'submit',
-              context: {
-                username: { path: '/user/name' },
-                count: { path: '/count' },
+              event: {
+                name: 'submit',
+                context: {
+                  username: { path: '/user/name' },
+                  count: { path: '/count' },
+                },
               },
             })
           }
@@ -179,9 +180,11 @@ describe('useDispatchAction', () => {
           data-testid="dispatch"
           onClick={() =>
             dispatchAction('main', 'btn-1', {
-              name: 'select',
-              context: {
-                itemName: { path: 'name' }, // Relative path
+              event: {
+                name: 'select',
+                context: {
+                  itemName: { path: 'name' }, // Relative path
+                },
               },
             })
           }
@@ -231,7 +234,7 @@ describe('useDispatchAction', () => {
           data-testid="dispatch"
           onClick={() =>
             dispatchAction('main', 'btn-1', {
-              name: 'simple-action',
+              event: { name: 'simple-action' },
             })
           }
         >
@@ -267,7 +270,9 @@ describe('useDispatchAction', () => {
       return (
         <button
           data-testid="dispatch"
-          onClick={() => dispatchAction('main', 'btn-1', { name: 'test' })}
+          onClick={() =>
+            dispatchAction('main', 'btn-1', { event: { name: 'test' } })
+          }
         >
           Click
         </button>

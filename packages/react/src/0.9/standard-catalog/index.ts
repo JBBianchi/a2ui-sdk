@@ -29,6 +29,23 @@
  */
 
 import type { ComponentType } from 'react'
+import {
+  FunctionRegistry,
+  openUrl,
+  formatString,
+  formatNumber,
+  formatCurrency,
+  formatDate,
+  pluralize,
+  and,
+  or,
+  not,
+  requiredFn,
+  emailFn,
+  regexFn,
+  lengthFn,
+  numericFn,
+} from '@a2ui-sdk/utils/0.9'
 
 // Display components
 import {
@@ -121,9 +138,34 @@ export const standardComponents: CatalogComponents = {
 }
 
 /**
- * Standard functions included in the default catalog (reserved for future use).
+ * Standard functions included in the default catalog.
  */
 export const standardFunctions: CatalogFunctions = {}
+
+/**
+ * Creates a FunctionRegistry with all standard catalog functions registered.
+ */
+export function createStandardFunctionRegistry(): FunctionRegistry {
+  const registry = new FunctionRegistry()
+  // Catalog functions
+  registry.register(openUrl)
+  registry.register(formatString)
+  registry.register(formatNumber)
+  registry.register(formatCurrency)
+  registry.register(formatDate)
+  registry.register(pluralize)
+  // Logic functions
+  registry.register(and)
+  registry.register(or)
+  registry.register(not)
+  // Validation functions
+  registry.register(requiredFn)
+  registry.register(emailFn)
+  registry.register(regexFn)
+  registry.register(lengthFn)
+  registry.register(numericFn)
+  return registry
+}
 
 /**
  * The standard catalog containing all built-in A2UI v0.9 components and functions.

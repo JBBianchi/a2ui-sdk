@@ -1,6 +1,10 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD033 -->
 <!-- markdownlint-disable MD034 -->
+
+> **Note**: This is a bundled reference copy. For the latest version, see the
+> [upstream A2UI specification](https://a2ui.org/specification/v0_9/).
+
 <div style="text-align: center;">
   <div class="centered-logo-text-group">
     <img src="../../../docs/assets/A2UI_dark.svg" alt="A2UI Protocol Logo" width="100">

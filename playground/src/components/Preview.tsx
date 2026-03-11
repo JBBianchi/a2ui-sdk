@@ -8,9 +8,12 @@ import {
 import {
   A2UIProvider as A2UIProviderV09,
   A2UIRenderer as A2UIRendererV09,
+  createStandardFunctionRegistry,
   type A2UIMessage as A2UIMessageV09,
   type A2UIAction as A2UIActionV09,
 } from '@a2ui-sdk/react/0.9'
+
+const functionRegistryV09 = createStandardFunctionRegistry()
 import { ErrorDisplay } from './ErrorDisplay'
 import type { A2UIVersion } from './VersionSelector'
 
@@ -93,6 +96,7 @@ export function Preview({ version, messages, error, onAction }: PreviewProps) {
         <A2UIProviderV09 messages={messages as A2UIMessageV09[]}>
           <A2UIRendererV09
             onAction={onAction as (action: A2UIActionV09) => void}
+            functionRegistry={functionRegistryV09}
           />
         </A2UIProviderV09>
       </ErrorBoundary>

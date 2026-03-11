@@ -93,6 +93,13 @@ export function getValueByPath(dataModel: DataModel, path: string): unknown {
  * setValueByPath(model, "/user/age", 30);        // { user: { name: "John", age: 30 } }
  * setValueByPath(model, "/user/name", undefined); // { user: {} }
  */
+/**
+ * Checks if a path segment looks like an array index (non-negative integer).
+ */
+function isNumericSegment(segment: string): boolean {
+  return /^\d+$/.test(segment)
+}
+
 export function setValueByPath(
   dataModel: DataModel,
   path: string,
@@ -114,32 +121,45 @@ export function setValueByPath(
   // Deep clone to ensure immutability
   const result = structuredClone(dataModel)
 
-  // Navigate to parent
+  // Navigate to parent, auto-vivifying intermediate containers
   let current: unknown = result
   for (let i = 0; i < segments.length - 1; i++) {
     const segment = segments[i]
+    const nextSegment = segments[i + 1]
 
     if (Array.isArray(current)) {
       const index = parseInt(segment, 10)
       if (isNaN(index)) {
         return result
       }
-      // Ensure array element exists as object
+      // Auto-vivify: use next-segment lookahead to decide array vs object
       if (current[index] === null || current[index] === undefined) {
-        current[index] = {}
+        current[index] = isNumericSegment(nextSegment) ? [] : {}
       }
       current = current[index]
     } else if (typeof current === 'object' && current !== null) {
       const obj = current as Record<string, unknown>
-      // Create intermediate object if needed
       if (obj[segment] === null || obj[segment] === undefined) {
-        obj[segment] = {}
+        // Auto-vivify: use next-segment lookahead
+        obj[segment] = isNumericSegment(nextSegment) ? [] : {}
       } else if (typeof obj[segment] !== 'object') {
-        obj[segment] = {}
+        // Throw on primitive traversal
+        throw new TypeError(
+          `Cannot traverse through primitive value at "${segments
+            .slice(0, i + 1)
+            .map((s) => '/' + s)
+            .join('')}"`
+        )
       }
       current = obj[segment]
     } else {
-      return result
+      // Throw on primitive traversal
+      throw new TypeError(
+        `Cannot traverse through primitive value at "${segments
+          .slice(0, i)
+          .map((s) => '/' + s)
+          .join('')}"`
+      )
     }
   }
 
@@ -149,7 +169,8 @@ export function setValueByPath(
     const index = parseInt(lastSegment, 10)
     if (!isNaN(index)) {
       if (value === undefined) {
-        current.splice(index, 1)
+        // Sparse array deletion: preserve length with undefined instead of splice
+        current[index] = undefined
       } else {
         current[index] = value
       }

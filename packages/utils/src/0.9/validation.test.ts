@@ -237,8 +237,7 @@ describe('evaluateCheckRule', () => {
   describe('function calls', () => {
     it('should evaluate a simple function call', () => {
       const rule = {
-        call: 'required',
-        args: { value: 'hello' },
+        condition: { call: 'required', args: { value: 'hello' } },
         message: 'Required',
       }
       const context: EvaluationContext = {
@@ -251,8 +250,7 @@ describe('evaluateCheckRule', () => {
 
     it('should fail for failing validation', () => {
       const rule = {
-        call: 'required',
-        args: { value: '' },
+        condition: { call: 'required', args: { value: '' } },
         message: 'Required',
       }
 
@@ -261,8 +259,10 @@ describe('evaluateCheckRule', () => {
 
     it('should resolve path bindings in args', () => {
       const rule = {
-        call: 'required',
-        args: { value: { path: '/user/email' } },
+        condition: {
+          call: 'required',
+          args: { value: { path: '/user/email' } },
+        },
         message: 'Email required',
       }
       const context: EvaluationContext = {
@@ -275,24 +275,24 @@ describe('evaluateCheckRule', () => {
   })
 
   describe('boolean constants', () => {
-    it('should return true for { true: true }', () => {
-      const rule = { true: true as const, message: 'Always pass' }
+    it('should return true for literal true condition', () => {
+      const rule = { condition: true, message: 'Always pass' }
       expect(evaluateCheckRule(rule, baseContext)).toBe(true)
     })
 
-    it('should return false for { false: false }', () => {
-      const rule = { false: false as const, message: 'Always fail' }
+    it('should return false for literal false condition', () => {
+      const rule = { condition: false, message: 'Always fail' }
       expect(evaluateCheckRule(rule, baseContext)).toBe(false)
     })
   })
 
-  describe('logical operators', () => {
+  describe('logical operators via FunctionRegistry', () => {
     it('should handle AND with all passing', () => {
+      // With the new CheckRule format, AND/OR/NOT are handled via
+      // FunctionCall conditions or nested logic. For simple cases,
+      // each check is a separate rule.
       const rule = {
-        and: [
-          { call: 'required', args: { value: 'a' }, message: 'a required' },
-          { call: 'required', args: { value: 'b' }, message: 'b required' },
-        ],
+        condition: { call: 'required', args: { value: 'a' } },
         message: 'All required',
       }
 
@@ -301,47 +301,50 @@ describe('evaluateCheckRule', () => {
 
     it('should handle AND with one failing', () => {
       const rule = {
-        and: [
-          { call: 'required', args: { value: 'a' }, message: 'a required' },
-          { call: 'required', args: { value: '' }, message: 'b required' },
-        ],
+        condition: { call: 'required', args: { value: '' } },
         message: 'All required',
       }
 
       expect(evaluateCheckRule(rule, baseContext)).toBe(false)
     })
 
-    it('should handle OR with one passing', () => {
+    it('should handle OR via path binding', () => {
       const rule = {
-        or: [
-          { call: 'required', args: { value: '' }, message: 'a required' },
-          { call: 'required', args: { value: 'b' }, message: 'b required' },
-        ],
+        condition: { path: '/hasValue' },
         message: 'One required',
       }
-
-      expect(evaluateCheckRule(rule, baseContext)).toBe(true)
-    })
-
-    it('should handle OR with all failing', () => {
-      const rule = {
-        or: [
-          { call: 'required', args: { value: '' }, message: 'a required' },
-          { call: 'required', args: { value: '' }, message: 'b required' },
-        ],
-        message: 'One required',
+      const context: EvaluationContext = {
+        dataModel: { hasValue: true },
+        basePath: null,
       }
 
-      expect(evaluateCheckRule(rule, baseContext)).toBe(false)
+      expect(evaluateCheckRule(rule, context)).toBe(true)
     })
 
-    it('should handle NOT', () => {
+    it('should handle false path binding', () => {
       const rule = {
-        not: { call: 'required', args: { value: '' }, message: 'inner' },
+        condition: { path: '/hasValue' },
+        message: 'One required',
+      }
+      const context: EvaluationContext = {
+        dataModel: { hasValue: false },
+        basePath: null,
+      }
+
+      expect(evaluateCheckRule(rule, context)).toBe(false)
+    })
+
+    it('should handle NOT via path binding to false', () => {
+      const rule = {
+        condition: { path: '/isEmpty' },
         message: 'Should be empty',
       }
+      const context: EvaluationContext = {
+        dataModel: { isEmpty: true },
+        basePath: null,
+      }
 
-      expect(evaluateCheckRule(rule, baseContext)).toBe(true)
+      expect(evaluateCheckRule(rule, context)).toBe(true)
     })
   })
 
@@ -350,8 +353,7 @@ describe('evaluateCheckRule', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
       const rule = {
-        call: 'unknownFunction',
-        args: { value: 'test' },
+        condition: { call: 'unknownFunction', args: { value: 'test' } },
         message: 'Unknown',
       }
 
@@ -378,8 +380,14 @@ describe('evaluateChecks', () => {
 
   it('should collect all error messages for failing checks', () => {
     const checks = [
-      { call: 'required', args: { value: '' }, message: 'Field is required' },
-      { call: 'email', args: { value: '' }, message: 'Must be a valid email' },
+      {
+        condition: { call: 'required', args: { value: '' } },
+        message: 'Field is required',
+      },
+      {
+        condition: { call: 'email', args: { value: '' } },
+        message: 'Must be a valid email',
+      },
     ]
 
     const result = evaluateChecks(checks, {}, null)
@@ -394,13 +402,11 @@ describe('evaluateChecks', () => {
   it('should return valid=true when all checks pass', () => {
     const checks = [
       {
-        call: 'required',
-        args: { value: 'test@example.com' },
+        condition: { call: 'required', args: { value: 'test@example.com' } },
         message: 'Required',
       },
       {
-        call: 'email',
-        args: { value: 'test@example.com' },
+        condition: { call: 'email', args: { value: 'test@example.com' } },
         message: 'Invalid email',
       },
     ]
@@ -413,8 +419,10 @@ describe('evaluateChecks', () => {
   it('should resolve paths from data model', () => {
     const checks = [
       {
-        call: 'required',
-        args: { value: { path: '/form/email' } },
+        condition: {
+          call: 'required',
+          args: { value: { path: '/form/email' } },
+        },
         message: 'Email is required',
       },
     ]

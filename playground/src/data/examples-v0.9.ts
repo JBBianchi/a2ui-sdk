@@ -18,6 +18,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -46,9 +47,9 @@ export const examplesV09: ExampleV09[] = [
               id: 'button',
               component: 'Button',
               child: 'button-text',
-              primary: true,
+              variant: 'primary',
               action: {
-                name: 'hello-click',
+                event: { name: 'hello-click' },
               },
             },
             {
@@ -70,6 +71,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -142,6 +144,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -171,9 +174,11 @@ export const examplesV09: ExampleV09[] = [
               value: { path: '/form/name' },
               checks: [
                 {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/form/name' } },
+                  },
                   message: 'Name is required',
-                  call: 'isNotEmpty',
-                  args: { value: { path: '/form/name' } },
                 },
               ],
             },
@@ -193,20 +198,24 @@ export const examplesV09: ExampleV09[] = [
               id: 'submit-btn',
               component: 'Button',
               child: 'submit-text',
-              primary: true,
+              variant: 'primary',
               action: {
-                name: 'submit-form',
-                context: {
-                  name: { path: '/form/name' },
-                  email: { path: '/form/email' },
-                  subscribe: { path: '/form/subscribe' },
+                event: {
+                  name: 'submit-form',
+                  context: {
+                    name: { path: '/form/name' },
+                    email: { path: '/form/email' },
+                    subscribe: { path: '/form/subscribe' },
+                  },
                 },
               },
               checks: [
                 {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/form/name' } },
+                  },
                   message: 'Name is required',
-                  call: 'isNotEmpty',
-                  args: { value: { path: '/form/name' } },
                 },
               ],
             },
@@ -240,6 +249,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -319,6 +329,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -351,12 +362,14 @@ export const examplesV09: ExampleV09[] = [
               id: 'btn-primary',
               component: 'Button',
               child: 'btn-primary-text',
-              primary: true,
+              variant: 'primary',
               action: {
-                name: 'button-click',
-                context: {
-                  button: 'primary',
-                  timestamp: { path: '/currentTime' },
+                event: {
+                  name: 'button-click',
+                  context: {
+                    button: 'primary',
+                    timestamp: { path: '/currentTime' },
+                  },
                 },
               },
             },
@@ -369,11 +382,13 @@ export const examplesV09: ExampleV09[] = [
               id: 'btn-secondary',
               component: 'Button',
               child: 'btn-secondary-text',
-              primary: false,
+              variant: 'default',
               action: {
-                name: 'button-click',
-                context: {
-                  button: 'secondary',
+                event: {
+                  name: 'button-click',
+                  context: {
+                    button: 'secondary',
+                  },
                 },
               },
             },
@@ -397,6 +412,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -489,6 +505,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -580,6 +597,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -660,6 +678,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -693,8 +712,8 @@ export const examplesV09: ExampleV09[] = [
               id: 'modal-trigger',
               component: 'Button',
               child: 'modal-trigger-text',
-              primary: true,
-              action: { name: 'open-modal' },
+              variant: 'primary',
+              action: { event: { name: 'open-modal' } },
             },
             {
               id: 'modal-trigger-text',
@@ -733,6 +752,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -812,6 +832,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -939,6 +960,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -1008,6 +1030,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -1059,12 +1082,13 @@ export const examplesV09: ExampleV09[] = [
   {
     id: 'interpolation',
     title: 'Interpolation',
-    description: 'String interpolation with ${path} syntax for dynamic text',
+    description: 'String interpolation using formatString function calls',
     messages: [
       {
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -1091,7 +1115,7 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'description',
               component: 'Text',
-              text: 'V0.9 supports \\${path} syntax to embed data model values directly in strings.',
+              text: 'V0.9 uses formatString function calls for interpolation. Simple values use path bindings directly.',
               variant: 'body',
             },
             {
@@ -1107,19 +1131,30 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'greeting',
               component: 'Text',
-              text: 'Hello, ${/user/name}!',
+              text: {
+                call: 'formatString',
+                args: { template: 'Hello, ${/user/name}!' },
+              },
               variant: 'h3',
             },
             {
               id: 'user-info',
               component: 'Text',
-              text: 'Email: ${/user/email} | Role: ${/user/role}',
+              text: {
+                call: 'formatString',
+                args: {
+                  template: 'Email: ${/user/email} | Role: ${/user/role}',
+                },
+              },
               variant: 'body',
             },
             {
               id: 'status',
               component: 'Text',
-              text: 'Account created on ${/user/createdAt}',
+              text: {
+                call: 'formatString',
+                args: { template: 'Account created on ${/user/createdAt}' },
+              },
               variant: 'caption',
             },
             {
@@ -1142,7 +1177,13 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'preview',
               component: 'Text',
-              text: 'Preview: Welcome back, ${/user/name}! You have ${/stats/unread} unread messages.',
+              text: {
+                call: 'formatString',
+                args: {
+                  template:
+                    'Preview: Welcome back, ${/user/name}! You have ${/stats/unread} unread messages.',
+                },
+              },
               variant: 'body',
             },
             {
@@ -1158,7 +1199,10 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'stats-title',
               component: 'Text',
-              text: 'Statistics for ${/user/name}',
+              text: {
+                call: 'formatString',
+                args: { template: 'Statistics for ${/user/name}' },
+              },
               variant: 'h4',
             },
             {
@@ -1170,19 +1214,28 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'stat1',
               component: 'Text',
-              text: '${/stats/posts} posts',
+              text: {
+                call: 'formatString',
+                args: { template: '${/stats/posts} posts' },
+              },
               variant: 'body',
             },
             {
               id: 'stat2',
               component: 'Text',
-              text: '${/stats/followers} followers',
+              text: {
+                call: 'formatString',
+                args: { template: '${/stats/followers} followers' },
+              },
               variant: 'body',
             },
             {
               id: 'stat3',
               component: 'Text',
-              text: '${/stats/following} following',
+              text: {
+                call: 'formatString',
+                args: { template: '${/stats/following} following' },
+              },
               variant: 'body',
             },
           ],
@@ -1220,6 +1273,7 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
+          root: 'root',
         },
       },
       {
@@ -1284,6 +1338,301 @@ export const examplesV09: ExampleV09[] = [
               variant: 'body',
             },
           ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'function-call-action',
+    title: 'Function Call Action',
+    description:
+      'FunctionCall actions execute locally instead of dispatching to the server',
+    group: 'Advanced',
+    messages: [
+      {
+        createSurface: {
+          surfaceId: 'main',
+          catalogId: 'standard',
+          root: 'root',
+        },
+      },
+      {
+        updateComponents: {
+          surfaceId: 'main',
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              children: ['heading', 'description', 'buttons'],
+            },
+            {
+              id: 'heading',
+              component: 'Text',
+              text: 'Function Call Actions',
+              variant: 'h2',
+            },
+            {
+              id: 'description',
+              component: 'Text',
+              text: 'V0.9 supports two action types: event actions (dispatched to server) and functionCall actions (executed locally). The button below uses a functionCall action to open a URL.',
+              variant: 'body',
+            },
+            {
+              id: 'buttons',
+              component: 'Row',
+              children: ['event-btn', 'fn-btn'],
+            },
+            {
+              id: 'event-btn',
+              component: 'Button',
+              child: 'event-btn-text',
+              variant: 'default',
+              action: {
+                event: {
+                  name: 'clicked',
+                  context: { type: 'event-action' },
+                },
+              },
+            },
+            {
+              id: 'event-btn-text',
+              component: 'Text',
+              text: 'Event Action (console)',
+            },
+            {
+              id: 'fn-btn',
+              component: 'Button',
+              child: 'fn-btn-text',
+              variant: 'primary',
+              action: {
+                functionCall: {
+                  call: 'openUrl',
+                  args: { url: 'https://a2ui.org' },
+                },
+              },
+            },
+            {
+              id: 'fn-btn-text',
+              component: 'Text',
+              text: 'Open A2UI.org',
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'validation',
+    title: 'Validation',
+    description: 'Form validation using condition-based CheckRules',
+    group: 'Advanced',
+    messages: [
+      {
+        createSurface: {
+          surfaceId: 'main',
+          catalogId: 'standard',
+          root: 'root',
+        },
+      },
+      {
+        updateComponents: {
+          surfaceId: 'main',
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              children: ['heading', 'description', 'form'],
+            },
+            {
+              id: 'heading',
+              component: 'Text',
+              text: 'Validation Demo',
+              variant: 'h2',
+            },
+            {
+              id: 'description',
+              component: 'Text',
+              text: 'V0.9 uses condition-based CheckRules with DynamicBoolean conditions. Try submitting the form with empty or invalid values.',
+              variant: 'body',
+            },
+            {
+              id: 'form',
+              component: 'Column',
+              children: ['name-field', 'email-field', 'submit-btn'],
+            },
+            {
+              id: 'name-field',
+              component: 'TextField',
+              label: 'Name',
+              value: { path: '/name' },
+              checks: [
+                {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/name' } },
+                  },
+                  message: 'Name is required',
+                },
+                {
+                  condition: {
+                    call: 'length',
+                    args: { value: { path: '/name' }, min: 2 },
+                  },
+                  message: 'Name must be at least 2 characters',
+                },
+              ],
+            },
+            {
+              id: 'email-field',
+              component: 'TextField',
+              label: 'Email',
+              value: { path: '/email' },
+              checks: [
+                {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/email' } },
+                  },
+                  message: 'Email is required',
+                },
+                {
+                  condition: {
+                    call: 'email',
+                    args: { value: { path: '/email' } },
+                  },
+                  message: 'Must be a valid email address',
+                },
+              ],
+            },
+            {
+              id: 'submit-btn',
+              component: 'Button',
+              child: 'submit-text',
+              variant: 'primary',
+              action: {
+                event: {
+                  name: 'submit',
+                  context: {
+                    name: { path: '/name' },
+                    email: { path: '/email' },
+                  },
+                },
+              },
+              checks: [
+                {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/name' } },
+                  },
+                  message: 'Name is required',
+                },
+                {
+                  condition: {
+                    call: 'required',
+                    args: { value: { path: '/email' } },
+                  },
+                  message: 'Email is required',
+                },
+              ],
+            },
+            {
+              id: 'submit-text',
+              component: 'Text',
+              text: 'Submit',
+            },
+          ],
+        },
+      },
+      {
+        updateDataModel: {
+          surfaceId: 'main',
+          path: '/',
+          value: {
+            name: '',
+            email: '',
+          },
+        },
+      },
+    ],
+  },
+  {
+    id: 'accessibility',
+    title: 'Accessibility',
+    description: 'Components with accessibility labels and descriptions',
+    group: 'Advanced',
+    messages: [
+      {
+        createSurface: {
+          surfaceId: 'main',
+          catalogId: 'standard',
+          root: 'root',
+        },
+      },
+      {
+        updateComponents: {
+          surfaceId: 'main',
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              children: ['heading', 'description', 'form'],
+            },
+            {
+              id: 'heading',
+              component: 'Text',
+              text: 'Accessibility Attributes',
+              variant: 'h2',
+            },
+            {
+              id: 'description',
+              component: 'Text',
+              text: 'V0.9 components support accessibility attributes (label, description) for screen readers.',
+              variant: 'body',
+            },
+            {
+              id: 'form',
+              component: 'Column',
+              children: ['search-field', 'submit-btn'],
+            },
+            {
+              id: 'search-field',
+              component: 'TextField',
+              label: 'Search',
+              value: { path: '/query' },
+              accessibility: {
+                label: 'Search products',
+                description:
+                  'Enter a product name or keyword to search the catalog',
+              },
+            },
+            {
+              id: 'submit-btn',
+              component: 'Button',
+              child: 'submit-text',
+              variant: 'primary',
+              action: {
+                event: {
+                  name: 'search',
+                  context: { query: { path: '/query' } },
+                },
+              },
+              accessibility: {
+                label: 'Submit search',
+              },
+            },
+            {
+              id: 'submit-text',
+              component: 'Text',
+              text: 'Search',
+            },
+          ],
+        },
+      },
+      {
+        updateDataModel: {
+          surfaceId: 'main',
+          path: '/',
+          value: { query: '' },
         },
       },
     ],

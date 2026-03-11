@@ -2,7 +2,7 @@
  * TextFieldComponent - Text input field with two-way binding.
  */
 
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import type { TextFieldComponentProps } from '@a2ui-sdk/types/0.9/standard-catalog'
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
@@ -33,10 +33,31 @@ export const TextFieldComponent = memo(function TextFieldComponent({
   variant = 'shortText',
   checks,
   weight,
+  validationRegexp,
 }: A2UIComponentProps<TextFieldComponentProps>) {
   const labelText = useStringBinding(surfaceId, label, '')
   const [value, setValue] = useFormBinding<string>(surfaceId, valueProp, '')
-  const { valid, errors } = useValidation(surfaceId, checks)
+  const { valid: checksValid, errors: checksErrors } = useValidation(
+    surfaceId,
+    checks
+  )
+
+  // Client-side regex validation
+  const regexpError = useMemo(() => {
+    if (!validationRegexp || !value) return null
+    try {
+      const re = new RegExp(validationRegexp)
+      if (!re.test(value)) {
+        return `Value does not match pattern: ${validationRegexp}`
+      }
+    } catch {
+      // Invalid regex, skip validation
+    }
+    return null
+  }, [validationRegexp, value])
+
+  const valid = checksValid && !regexpError
+  const errors = regexpError ? [...checksErrors, regexpError] : checksErrors
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

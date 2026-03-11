@@ -28,7 +28,7 @@ function SurfaceSetup({
   const ctx = useSurfaceContext()
 
   if (!ctx.getSurface(surfaceId)) {
-    ctx.createSurface(surfaceId, 'catalog-1')
+    ctx.createSurface(surfaceId, 'catalog-1', 'root')
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
 
@@ -179,7 +179,9 @@ describe('useDataBinding', () => {
 })
 
 describe('useStringBinding', () => {
-  it('should resolve string with interpolation', () => {
+  it('should return literal string without interpolation', () => {
+    // Auto-interpolation of ${...} was removed per spec. Interpolation only
+    // happens inside formatString function calls.
     function Test() {
       const value = useStringBinding('main', 'Hello, ${/user/name}!', '')
       return <span data-testid="value">{value}</span>
@@ -193,7 +195,10 @@ describe('useStringBinding', () => {
       </SurfaceProvider>
     )
 
-    expect(screen.getByTestId('value')).toHaveTextContent('Hello, Alice!')
+    // Should return the literal string without interpolation
+    expect(screen.getByTestId('value')).toHaveTextContent(
+      'Hello, ${/user/name}!'
+    )
   })
 
   it('should handle path binding for string', () => {

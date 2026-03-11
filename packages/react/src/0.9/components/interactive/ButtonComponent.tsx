@@ -18,7 +18,7 @@ export const ButtonComponent = memo(function ButtonComponent({
   surfaceId,
   componentId,
   child,
-  primary = false,
+  variant = 'default',
   action,
   checks,
   weight,
@@ -38,9 +38,17 @@ export const ButtonComponent = memo(function ButtonComponent({
   // Disable button if checks fail
   const isDisabled = !valid
 
+  // Map A2UI variant to shadcn Button variant
+  const buttonVariant =
+    variant === 'primary'
+      ? 'default'
+      : variant === 'borderless'
+        ? 'ghost'
+        : 'outline'
+
   return (
     <Button
-      variant={primary ? 'default' : 'outline'}
+      variant={buttonVariant}
       onClick={handleClick}
       disabled={isDisabled}
       className="inline-flex items-center justify-center"

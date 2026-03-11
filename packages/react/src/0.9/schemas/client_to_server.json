@@ -30,6 +30,11 @@
           "type": "object",
           "description": "A JSON object containing the key-value pairs from the component's action.context, after resolving all data bindings.",
           "additionalProperties": true
+        },
+        "dataModel": {
+          "type": "object",
+          "description": "The full data model of the surface, included when sendDataModel is enabled.",
+          "additionalProperties": true
         }
       },
       "required": [

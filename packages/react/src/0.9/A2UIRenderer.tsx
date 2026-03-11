@@ -22,10 +22,15 @@
  * ```
  */
 
+import { useCallback } from 'react'
 import { useSurfaceContext } from './contexts/SurfaceContext'
 import { ActionProvider } from './contexts/ActionContext'
+import { ErrorProvider } from './contexts/ErrorContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { FunctionRegistryProvider } from './contexts/FunctionRegistryContext'
 import { ComponentRenderer } from './components/ComponentRenderer'
-import type { ComponentDefinition, ActionHandler } from '@a2ui-sdk/types/0.9'
+import type { ActionHandler, ErrorHandler } from '@a2ui-sdk/types/0.9'
+import type { FunctionRegistry } from '@a2ui-sdk/utils/0.9'
 
 /**
  * Props for A2UIRenderer.
@@ -35,60 +40,10 @@ export interface A2UIRendererProps {
   surfaceId?: string
   /** Callback when an action is dispatched */
   onAction?: ActionHandler
-}
-
-/**
- * Gets the root component ID from a surface's component tree.
- * The root component is typically identified as "root" or is the first component added.
- */
-function findRootComponentId(
-  components: Map<string, ComponentDefinition>
-): string | undefined {
-  // Check for component with id "root"
-  if (components.has('root')) {
-    return 'root'
-  }
-
-  // Otherwise, find a component that has children but is not a child of any other component
-  const allChildIds = new Set<string>()
-
-  for (const comp of components.values()) {
-    // Check if component has children property (layout components)
-    if ('children' in comp) {
-      const children = comp.children as
-        | string[]
-        | { componentId: string; path: string }
-      if (Array.isArray(children)) {
-        children.forEach((id) => allChildIds.add(id))
-      }
-    }
-    // Check for single child
-    if ('child' in comp && typeof comp.child === 'string') {
-      allChildIds.add(comp.child)
-    }
-    // Check for trigger/content (Modal)
-    if ('trigger' in comp && typeof comp.trigger === 'string') {
-      allChildIds.add(comp.trigger)
-    }
-    if ('content' in comp && typeof comp.content === 'string') {
-      allChildIds.add(comp.content)
-    }
-    // Check for tabs
-    if ('tabs' in comp && Array.isArray(comp.tabs)) {
-      ;(comp.tabs as Array<{ child: string }>).forEach((tab) => {
-        if (tab.child) allChildIds.add(tab.child)
-      })
-    }
-  }
-
-  // Find a component that is not a child of any other component
-  for (const [id] of components) {
-    if (!allChildIds.has(id)) {
-      return id
-    }
-  }
-
-  return undefined
+  /** Callback when an error occurs */
+  onError?: ErrorHandler
+  /** Function registry for executing functionCall actions and data binding */
+  functionRegistry?: FunctionRegistry
 }
 
 /**
@@ -111,8 +66,18 @@ function findRootComponentId(
  * </A2UIProvider>
  * ```
  */
-export function A2UIRenderer({ surfaceId, onAction }: A2UIRendererProps) {
-  const { surfaces } = useSurfaceContext()
+export function A2UIRenderer({
+  surfaceId,
+  onAction,
+  onError,
+  functionRegistry,
+}: A2UIRendererProps) {
+  const { surfaces, getSurface } = useSurfaceContext()
+
+  const getSendDataModel = useCallback(
+    (id: string) => getSurface(id)?.sendDataModel === true,
+    [getSurface]
+  )
 
   // Render specific surface if surfaceId is provided
   if (surfaceId) {
@@ -121,15 +86,25 @@ export function A2UIRenderer({ surfaceId, onAction }: A2UIRendererProps) {
       return null
     }
 
-    const rootId = findRootComponentId(surface.components)
+    const rootId = surface.root
     if (!rootId) {
       return null
     }
 
     return (
-      <ActionProvider onAction={onAction}>
-        <ComponentRenderer surfaceId={surfaceId} componentId={rootId} />
-      </ActionProvider>
+      <ErrorProvider onError={onError}>
+        <FunctionRegistryProvider registry={functionRegistry}>
+          <ActionProvider
+            onAction={onAction}
+            functionRegistry={functionRegistry}
+            getSendDataModel={getSendDataModel}
+          >
+            <ThemeProvider theme={surface.theme}>
+              <ComponentRenderer surfaceId={surfaceId} componentId={rootId} />
+            </ThemeProvider>
+          </ActionProvider>
+        </FunctionRegistryProvider>
+      </ErrorProvider>
     )
   }
 
@@ -141,22 +116,32 @@ export function A2UIRenderer({ surfaceId, onAction }: A2UIRendererProps) {
   }
 
   return (
-    <ActionProvider onAction={onAction}>
-      {surfaceEntries.map(([id, surface]) => {
-        if (!surface.created) {
-          return null
-        }
+    <ErrorProvider onError={onError}>
+      <FunctionRegistryProvider registry={functionRegistry}>
+        <ActionProvider
+          onAction={onAction}
+          functionRegistry={functionRegistry}
+          getSendDataModel={getSendDataModel}
+        >
+          {surfaceEntries.map(([id, surface]) => {
+            if (!surface.created) {
+              return null
+            }
 
-        const rootId = findRootComponentId(surface.components)
-        if (!rootId) {
-          return null
-        }
+            const rootId = surface.root
+            if (!rootId) {
+              return null
+            }
 
-        return (
-          <ComponentRenderer key={id} surfaceId={id} componentId={rootId} />
-        )
-      })}
-    </ActionProvider>
+            return (
+              <ThemeProvider key={id} theme={surface.theme}>
+                <ComponentRenderer surfaceId={id} componentId={rootId} />
+              </ThemeProvider>
+            )
+          })}
+        </ActionProvider>
+      </FunctionRegistryProvider>
+    </ErrorProvider>
   )
 }
 

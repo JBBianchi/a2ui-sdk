@@ -33,6 +33,8 @@ export type {
   DeleteSurfacePayload,
   // Component types
   ComponentDefinition,
+  ComponentCommon,
+  CatalogComponentCommon,
   // Value types
   DynamicValue,
   DynamicString,
@@ -43,8 +45,16 @@ export type {
   TemplateBinding,
   // Action types
   Action,
+  EventAction,
+  FunctionCallAction,
   ActionPayload as A2UIAction,
   ActionHandler,
+  // Error types
+  ErrorPayload,
+  ErrorHandler,
+  // Theme types
+  ThemeConfig,
+  AccessibilityAttributes,
   // Validation types
   CheckRule,
   Checkable,
@@ -53,6 +63,8 @@ export type {
   ScopeValue,
   DataModel,
 } from '@a2ui-sdk/types/0.9'
+
+export { isEventAction, isFunctionCallAction } from '@a2ui-sdk/types/0.9'
 
 export type { A2UIProviderProps } from './contexts/A2UIProvider'
 export type { A2UIRendererProps } from './A2UIRenderer'
@@ -67,7 +79,10 @@ export type {
 export { A2UIProvider } from './contexts/A2UIProvider'
 export { A2UIRenderer } from './A2UIRenderer'
 export { ComponentRenderer } from './components/ComponentRenderer'
-export { standardCatalog } from './standard-catalog'
+export {
+  standardCatalog,
+  createStandardFunctionRegistry,
+} from './standard-catalog'
 
 // ============ Hooks ============
 
@@ -82,5 +97,11 @@ export { useValidation } from './hooks/useValidation'
 export { useSurfaceContext } from './contexts/SurfaceContext'
 export { useScope, useScopeBasePath } from './contexts/ScopeContext'
 export { ActionProvider, useActionContext } from './contexts/ActionContext'
+export {
+  FunctionRegistryProvider,
+  useFunctionRegistry,
+} from './contexts/FunctionRegistryContext'
+export { ErrorProvider, useErrorContext } from './contexts/ErrorContext'
+export { ThemeProvider, useTheme } from './contexts/ThemeContext'
 export { useA2UIMessageHandler } from './hooks/useA2UIMessageHandler'
 export type { A2UIMessageHandler } from './hooks/useA2UIMessageHandler'

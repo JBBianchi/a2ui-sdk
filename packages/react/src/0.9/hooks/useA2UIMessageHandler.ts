@@ -104,10 +104,18 @@ export function useA2UIMessageHandler(): A2UIMessageHandler {
 
   const processMessage = useCallback(
     (message: A2UIMessage) => {
+      // Check version compatibility
+      if (message.version && message.version !== '0.9') {
+        console.warn(
+          `[A2UI 0.9] Message version "${message.version}" does not match expected version "0.9"`
+        )
+      }
+
       // Handle createSurface
       if ('createSurface' in message) {
-        const { surfaceId, catalogId } = message.createSurface
-        createSurface(surfaceId, catalogId)
+        const { surfaceId, catalogId, root, theme, sendDataModel } =
+          message.createSurface
+        createSurface(surfaceId, catalogId, root, theme, sendDataModel)
         // Track synchronously so subsequent messages in the same batch work
         createdSurfacesRef.current.add(surfaceId)
         // Apply any buffered messages

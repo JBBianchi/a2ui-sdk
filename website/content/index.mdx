@@ -10,7 +10,7 @@ Supports all components in A2UI standard catalog out of the box. Built with [sha
 
 Currently both A2UI protocol v0.8 and v0.9 are supported.
 
-**⚠️ Important:** V0.9 is a draft version based on the A2UI specification as of 2026-01-12. The v0.9 protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 until v0.9 reaches alpha or beta status.**
+**⚠️ Important:** V0.9 is a draft version based on the A2UI specification as of 2026-03-11. The v0.9 protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 until v0.9 reaches alpha or beta status.**
 
 ## Packages
 
@@ -181,7 +181,7 @@ export function CustomSwitchComponent({
 
 ## V0.9
 
-> **⚠️ Draft Version Warning:** V0.9 is currently a draft implementation based on the A2UI specification as of 2026-01-12. The protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 for production use until v0.9 reaches alpha or beta status.**
+> **⚠️ Draft Version Warning:** V0.9 is currently a draft implementation based on the A2UI specification as of 2026-03-11. The protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 for production use until v0.9 reaches alpha or beta status.**
 
 ### Usage
 
@@ -197,10 +197,14 @@ Next, use `A2UIProvider` and `A2UIRenderer` to render A2UI messages:
 import {
   A2UIProvider,
   A2UIRenderer,
+  createStandardFunctionRegistry,
   useA2UIMessageHandler,
   type A2UIMessage,
   type A2UIAction,
 } from '@a2ui-sdk/react/0.9'
+
+// Create a function registry for local function execution (validation, formatting, etc.)
+const functionRegistry = createStandardFunctionRegistry()
 
 function App() {
   return (
@@ -225,9 +229,62 @@ function MyApp() {
   }
 
   return (
-    <A2UIRenderer onAction={handleAction} />
+    <A2UIRenderer
+      onAction={handleAction}
+      functionRegistry={functionRegistry}
+    />
   )
 }
 ```
 
-Additionally, override or extend the standard catalog the same way as in v0.8.
+#### Key differences from v0.8
+
+- **Actions** are now a discriminated union: `EventAction` (dispatched to server) or `FunctionCallAction` (executed locally via function registry)
+- **Validation** uses condition-based `CheckRule` with `{ condition: DynamicBoolean, message: string }`
+- **CreateSurface** requires a `root` field specifying the root component ID
+- **New providers**: `ThemeProvider`, `ErrorProvider`, `FunctionRegistryProvider` (all included in `A2UIRenderer`)
+- **Accessibility**: Components support `accessibility: { label, description }` attributes
+
+#### Custom components
+
+Override or extend the standard catalog the same way as in v0.8:
+
+```tsx
+import {
+  A2UIProvider,
+  A2UIRenderer,
+  standardCatalog,
+  useDispatchAction,
+  useDataBinding,
+  useFormBinding,
+  ComponentRenderer,
+  isEventAction,
+  type A2UIAction,
+} from '@a2ui-sdk/react/0.9'
+
+// Extend standard catalog with custom components
+const customCatalog = {
+  ...standardCatalog,
+  components: {
+    ...standardCatalog.components,
+    Button: CustomButtonComponent,
+  },
+}
+
+// Custom button component using v0.9 action types
+function CustomButtonComponent({ surfaceId, componentId, child, action }) {
+  const dispatchAction = useDispatchAction()
+
+  const handleClick = () => {
+    if (action) {
+      dispatchAction(surfaceId, componentId, action)
+    }
+  }
+
+  return (
+    <button onClick={handleClick}>
+      <ComponentRenderer surfaceId={surfaceId} componentId={child} />
+    </button>
+  )
+}
+```

@@ -352,7 +352,7 @@ interface ScopeValue {
 
 ## V0.9
 
-> **⚠️ Draft Version Warning:** V0.9 is currently a draft implementation based on the A2UI specification as of 2026-01-12. The protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 for production use until v0.9 reaches alpha or beta status.**
+> **⚠️ Draft Version Warning:** V0.9 is currently a draft implementation based on the A2UI specification as of 2026-03-11. The protocol has changed significantly recently and may continue to evolve. **We recommend using the stable v0.8 for production use until v0.9 reaches alpha or beta status.**
 
 ### React
 
@@ -384,9 +384,22 @@ interface Catalog {
 const standardCatalog: Catalog
 
 /**
- * Main renderer component that renders all surfaces.
+ * Creates a FunctionRegistry pre-loaded with all standard functions
+ * (format, logic, validation, navigation).
  */
-function A2UIRenderer(): React.ReactElement
+function createStandardFunctionRegistry(): FunctionRegistry
+
+/**
+ * Main renderer component that renders all surfaces.
+ * Wraps children with ErrorProvider, FunctionRegistryProvider,
+ * ActionProvider, and ThemeProvider.
+ */
+function A2UIRenderer(props: {
+  surfaceId?: string
+  onAction?: ActionHandler
+  onError?: ErrorHandler
+  functionRegistry?: FunctionRegistry
+}): React.ReactElement
 
 /**
  * Renders a component by ID from the component registry.
@@ -459,11 +472,13 @@ function useScopeBasePath(): string | null
  * Provider component for action dispatching.
  * Creates a context for managing action handlers.
  *
- * Note: Usually not needed as A2UIProvider already includes this.
+ * Note: Usually not needed as A2UIRenderer already includes this.
  * Use only for advanced customization scenarios.
  */
 function ActionProvider(props: {
   onAction?: ActionHandler
+  functionRegistry?: FunctionRegistry
+  getSendDataModel?: (surfaceId: string) => boolean
   children: React.ReactNode
 }): React.ReactElement
 
@@ -485,6 +500,48 @@ interface ActionContextValue {
   ) => void
   onAction: ActionHandler | null
 }
+
+/**
+ * Provider for a FunctionRegistry instance.
+ * Usually not needed as A2UIRenderer already includes this.
+ */
+function FunctionRegistryProvider(props: {
+  registry?: FunctionRegistry
+  children: React.ReactNode
+}): React.ReactElement
+
+/**
+ * Hook to access the function registry.
+ */
+function useFunctionRegistry(): FunctionRegistry | undefined
+
+/**
+ * Provider for error reporting.
+ * Usually not needed as A2UIRenderer already includes this.
+ */
+function ErrorProvider(props: {
+  onError?: ErrorHandler
+  children: React.ReactNode
+}): React.ReactElement
+
+/**
+ * Hook to access the error reporting context.
+ */
+function useErrorContext(): { reportError: (error: ErrorPayload) => void }
+
+/**
+ * Provider for surface-level theme configuration.
+ * Usually not needed as A2UIRenderer already includes this.
+ */
+function ThemeProvider(props: {
+  theme?: ThemeConfig
+  children: React.ReactNode
+}): React.ReactElement
+
+/**
+ * Hook to access the current theme configuration.
+ */
+function useTheme(): ThemeConfig | undefined
 
 /**
  * Hook for processing A2UI messages incrementally.
@@ -523,6 +580,12 @@ function useA2UIMessageHandler(): {
   processMessages: (messages: A2UIMessage[]) => void
   clear: () => void
 }
+
+/**
+ * Type guards for discriminating action types.
+ */
+function isEventAction(action: Action): action is EventAction
+function isFunctionCallAction(action: Action): action is FunctionCallAction
 ````
 
 ### Utils
@@ -546,13 +609,36 @@ function hasInterpolation(value: string): boolean
 
 /**
  * Resolves a DynamicValue to its actual value.
+ * Handles literal values, path bindings, and function calls.
  */
-function resolveDynamicValue<T>(
-  value: DynamicValue | undefined,
+function resolveValue<T = unknown>(
+  value: FormBindableValue | undefined | null,
   dataModel: DataModel,
-  basePath: string | null,
-  defaultValue?: T
+  basePath?: string | null,
+  defaultValue?: T,
+  registry?: FunctionRegistry
 ): T
+
+/**
+ * Resolves a DynamicString to a string.
+ * Convenience wrapper with string coercion.
+ */
+function resolveString(
+  value: DynamicString | undefined | null,
+  dataModel: DataModel,
+  basePath?: string | null,
+  defaultValue?: string,
+  registry?: FunctionRegistry
+): string
+
+/**
+ * Resolves action context values to a plain object.
+ */
+function resolveContext(
+  context: Record<string, DynamicValue> | undefined,
+  dataModel: DataModel,
+  basePath?: string | null
+): Record<string, unknown>
 
 /**
  * Gets a value from the data model at a JSON Pointer path.
@@ -569,13 +655,52 @@ function setValueByPath(
 ): DataModel
 
 /**
- * Evaluates a CheckRule against the data model.
+ * Evaluates a CheckRule's condition as a DynamicBoolean.
  */
-function evaluateCheckRule(
-  rule: CheckRule,
+function evaluateCheckRule(rule: CheckRule, context: EvaluationContext): boolean
+
+/**
+ * Evaluates all checks and returns a ValidationResult.
+ */
+function evaluateChecks(
+  checks: CheckRule[] | undefined,
   dataModel: DataModel,
-  basePath: string | null
+  basePath: string | null,
+  registry?: FunctionRegistry
 ): ValidationResult
+
+/**
+ * Framework-agnostic data store with path-based subscriptions.
+ * Supports useSyncExternalStore integration.
+ */
+class DataStore {
+  get(path: string): unknown
+  set(path: string, value: unknown): void
+  subscribe(path: string, callback: () => void): () => void
+  getSnapshot(): DataModel
+}
+
+/**
+ * Registry for local function execution.
+ */
+class FunctionRegistry {
+  register(name: string, fn: FunctionImplementation): void
+  get(name: string): FunctionImplementation | undefined
+  has(name: string): boolean
+  execute(
+    name: string,
+    args: Record<string, unknown>,
+    dataModel: DataModel,
+    basePath: string | null
+  ): unknown
+}
+
+/**
+ * Coercion utilities (per spec coercion table).
+ */
+function coerceToBoolean(value: unknown): boolean
+function coerceToString(value: unknown): string
+function coerceToNumber(value: unknown): number
 ```
 
 ### Types
@@ -585,12 +710,34 @@ function evaluateCheckRule(
 
 /**
  * A2UI message from server to client.
+ * Optionally includes a protocol version field.
  */
-type A2UIMessage =
+type A2UIMessage = { version?: string } & (
   | { createSurface: CreateSurfacePayload }
   | { updateComponents: UpdateComponentsPayload }
   | { updateDataModel: UpdateDataModelPayload }
   | { deleteSurface: DeleteSurfacePayload }
+)
+
+/**
+ * CreateSurface message payload.
+ */
+interface CreateSurfacePayload {
+  surfaceId: string
+  catalogId: string
+  root: string
+  theme?: ThemeConfig
+  sendDataModel?: boolean
+}
+
+/**
+ * Theme configuration for a surface.
+ */
+interface ThemeConfig {
+  primaryColor?: string
+  iconUrl?: string
+  agentDisplayName?: string
+}
 
 /**
  * Resolved action payload sent to the action handler.
@@ -601,6 +748,7 @@ interface A2UIAction {
   sourceComponentId: string
   timestamp: string // ISO 8601
   context: Record<string, unknown>
+  dataModel?: Record<string, unknown>
 }
 
 /**
@@ -609,34 +757,75 @@ interface A2UIAction {
 type ActionHandler = (action: A2UIAction) => void
 
 /**
- * Dynamic value types for data binding.
+ * Error payload for client-to-server error reporting.
  */
-type DynamicValue = string | number | boolean | { path: string } | FunctionCall
-type DynamicString = string | { path: string } | FunctionCall
-type DynamicNumber = number | { path: string } | FunctionCall
-type DynamicBoolean = boolean | { path: string } | LogicExpression
-type DynamicStringList = string[] | { path: string } | FunctionCall
-
-/**
- * Action definition (attached to Button components).
- */
-interface Action {
-  name: string
-  context?: Record<string, DynamicValue>
+interface ErrorPayload {
+  code: string
+  surfaceId: string
+  path?: string
+  message: string
 }
 
 /**
+ * Error handler callback type.
+ */
+type ErrorHandler = (error: ErrorPayload) => void
+
+/**
+ * Dynamic value types for data binding.
+ */
+type DynamicValue =
+  | string
+  | number
+  | boolean
+  | unknown[]
+  | { path: string }
+  | FunctionCall
+type DynamicString = string | { path: string } | FunctionCall
+type DynamicNumber = number | { path: string } | FunctionCall
+type DynamicBoolean = boolean | { path: string } | FunctionCall
+type DynamicStringList = string[] | { path: string } | FunctionCall
+
+/**
+ * A function call expression.
+ */
+interface FunctionCall {
+  call: string
+  args?: Record<string, DynamicValue>
+  returnType?: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'any'
+}
+
+/**
+ * Action definition (attached to interactive components).
+ * Discriminated union: either an event (dispatched to server)
+ * or a functionCall (executed locally).
+ */
+type Action = EventAction | FunctionCallAction
+
+interface EventAction {
+  event: {
+    name: string
+    context?: Record<string, DynamicValue>
+  }
+}
+
+interface FunctionCallAction {
+  functionCall: FunctionCall
+}
+
+/**
+ * Type guards for action discrimination.
+ */
+function isEventAction(action: Action): action is EventAction
+function isFunctionCallAction(action: Action): action is FunctionCallAction
+
+/**
  * Check rule for validation.
+ * Uses condition-based DynamicBoolean evaluation.
  */
 interface CheckRule {
+  condition: DynamicBoolean
   message: string
-  call?: string
-  args?: Record<string, DynamicValue>
-  and?: CheckRule[]
-  or?: CheckRule[]
-  not?: CheckRule
-  true?: true
-  false?: false
 }
 
 /**
@@ -645,6 +834,29 @@ interface CheckRule {
 interface ValidationResult {
   valid: boolean
   errors: string[]
+}
+
+/**
+ * Accessibility attributes for components.
+ */
+interface AccessibilityAttributes {
+  label?: DynamicString
+  description?: DynamicString
+}
+
+/**
+ * Common properties for all components.
+ */
+interface ComponentCommon {
+  id: string
+  accessibility?: AccessibilityAttributes
+}
+
+/**
+ * Common properties for catalog components.
+ */
+interface CatalogComponentCommon {
+  weight?: number // flex-grow for Row/Column children
 }
 
 /**

@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default defineConfig(
-  { ignores: ['dist', 'node_modules', 'coverage', 'playground'] },
+  { ignores: ['dist', '**/dist/**', 'node_modules', 'coverage', 'playground'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

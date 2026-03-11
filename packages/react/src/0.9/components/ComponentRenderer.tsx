@@ -7,7 +7,9 @@
  */
 
 import { memo, useContext } from 'react'
+import type { AccessibilityAttributes } from '@a2ui-sdk/types/0.9'
 import { useComponent } from '../hooks/useComponent'
+import { useStringBinding } from '../hooks/useDataBinding'
 import { ComponentsMapContext } from '../contexts/ComponentsMapContext'
 import { UnknownComponent } from './UnknownComponent'
 
@@ -76,16 +78,32 @@ export const ComponentRenderer = memo(function ComponentRenderer({
   // Add to rendering set for circular reference detection
   renderingComponents.add(renderKey)
 
-  // Extract props from component, excluding 'component' (the type discriminator) and 'id'
+  // Extract props from component, excluding 'component' (the type discriminator), 'id',
+  // 'accessibility', and '_generation' (internal type-change counter)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { component: _type, id: _id, ...props } = component
+  const {
+    component: _type,
+    id: _id,
+    accessibility,
+    _generation,
+    ...props
+  } = component
+
+  // Use _generation in the key so that component type changes force a full
+  // unmount/remount, resetting any internal React state from the previous type.
+  const instanceKey = _generation
+    ? `${componentId}:${_generation}`
+    : componentId
 
   try {
     return (
-      <ComponentImpl
+      <AccessibleComponent
+        key={instanceKey}
         surfaceId={surfaceId}
         componentId={componentId}
-        {...props}
+        accessibility={accessibility as AccessibilityAttributes | undefined}
+        ComponentImpl={ComponentImpl}
+        props={props}
       />
     )
   } finally {
@@ -95,3 +113,47 @@ export const ComponentRenderer = memo(function ComponentRenderer({
 })
 
 ComponentRenderer.displayName = 'A2UI.ComponentRenderer'
+
+/**
+ * Inner component that resolves accessibility DynamicStrings via hooks
+ * and renders the actual component implementation with aria attributes.
+ */
+const AccessibleComponent = memo(function AccessibleComponent({
+  surfaceId,
+  componentId,
+  accessibility,
+  ComponentImpl,
+  props,
+}: {
+  surfaceId: string
+  componentId: string
+  accessibility: AccessibilityAttributes | undefined
+  ComponentImpl: React.ComponentType<Record<string, unknown>>
+  props: Record<string, unknown>
+}) {
+  const ariaLabel = useStringBinding(surfaceId, accessibility?.label, '')
+  const ariaDescription = useStringBinding(
+    surfaceId,
+    accessibility?.description,
+    ''
+  )
+
+  const ariaProps: Record<string, string> = {}
+  if (ariaLabel) {
+    ariaProps['aria-label'] = ariaLabel
+  }
+  if (ariaDescription) {
+    ariaProps['aria-description'] = ariaDescription
+  }
+
+  return (
+    <ComponentImpl
+      surfaceId={surfaceId}
+      componentId={componentId}
+      {...props}
+      {...ariaProps}
+    />
+  )
+})
+
+AccessibleComponent.displayName = 'A2UI.AccessibleComponent'

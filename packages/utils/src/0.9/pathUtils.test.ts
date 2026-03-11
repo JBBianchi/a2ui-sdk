@@ -245,10 +245,14 @@ describe('pathUtils', () => {
       expect(result).toEqual({ items: ['a', 'x', 'c'] })
     })
 
-    it('should delete array element', () => {
+    it('should delete array element with sparse preservation', () => {
       const model = { items: ['a', 'b', 'c'] }
       const result = setValueByPath(model, '/items/1', undefined)
-      expect(result).toEqual({ items: ['a', 'c'] })
+      // Per spec: array deletion preserves length with undefined (sparse array)
+      expect(result.items).toHaveLength(3)
+      expect(result.items[0]).toBe('a')
+      expect(result.items[1]).toBeUndefined()
+      expect(result.items[2]).toBe('c')
     })
 
     it('should be immutable - not modify original model', () => {
