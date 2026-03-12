@@ -43,12 +43,10 @@ function TestProviderWithError({
 function SurfaceSetup({
   surfaceId,
   components,
-  rootId = 'root',
   children,
 }: {
   surfaceId: string
   components: ComponentDefinition[]
-  rootId?: string
   children: ReactNode
 }) {
   const ctx = useSurfaceContext()
@@ -56,7 +54,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1', rootId)
+    ctx.createSurface(surfaceId, 'catalog-1')
     ctx.updateComponents(surfaceId, components)
   }
 

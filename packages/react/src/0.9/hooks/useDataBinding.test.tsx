@@ -28,7 +28,7 @@ function SurfaceSetup({
   const ctx = useSurfaceContext()
 
   if (!ctx.getSurface(surfaceId)) {
-    ctx.createSurface(surfaceId, 'catalog-1', 'root')
+    ctx.createSurface(surfaceId, 'catalog-1')
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
 

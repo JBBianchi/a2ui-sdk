@@ -36,7 +36,6 @@ export interface ThemeConfig {
 export interface CreateSurfacePayload {
   surfaceId: string
   catalogId: string
-  root: string
   theme?: ThemeConfig
   sendDataModel?: boolean
 }
@@ -223,7 +222,6 @@ export type DataModel = Record<string, unknown>
 export interface SurfaceState {
   surfaceId: string
   catalogId: string
-  root: string
   components: Map<string, ComponentDefinition>
   dataModel: DataModel
   created: boolean

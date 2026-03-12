@@ -32,7 +32,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1', 'root')
+    ctx.createSurface(surfaceId, 'catalog-1')
     ctx.updateComponents(surfaceId, components)
     if (dataModel) {
       ctx.updateDataModel(surfaceId, '/', dataModel)

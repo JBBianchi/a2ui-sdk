@@ -34,14 +34,14 @@ describe('Schema Validation (T092a)', () => {
       // Should require the createSurface property
       expect(createSurface.required).toContain('createSurface')
 
-      // The createSurface property should require surfaceId, catalogId, root
+      // The createSurface property should require surfaceId, catalogId
       const props = createSurface.properties as Record<
         string,
         Record<string, unknown>
       >
       const createSurfaceObj = props.createSurface as Record<string, unknown>
       expect(createSurfaceObj.required).toEqual(
-        expect.arrayContaining(['surfaceId', 'catalogId', 'root'])
+        expect.arrayContaining(['surfaceId', 'catalogId'])
       )
     })
 

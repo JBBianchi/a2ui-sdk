@@ -33,10 +33,6 @@
               "description": "A string that uniquely identifies this catalog. It is recommended to prefix this with an internet domain that you own, to avoid conflicts e.g. mycompany.com:somecatalog'.",
               "type": "string"
             },
-            "root": {
-              "type": "string",
-              "description": "The component ID to use as the root of the component tree for this surface."
-            },
             "theme": {
               "type": "object",
               "description": "Optional theme configuration for this surface.",
@@ -52,7 +48,7 @@
               "description": "When true, the client includes the surface data model in action payloads."
             }
           },
-          "required": ["surfaceId", "catalogId", "root"],
+          "required": ["surfaceId", "catalogId"],
           "additionalProperties": false
         }
       },

@@ -69,7 +69,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1', 'root', undefined, sendDataModel)
+    ctx.createSurface(surfaceId, 'catalog-1', undefined, sendDataModel)
     ctx.updateDataModel(surfaceId, '/', dataModel)
   }
 

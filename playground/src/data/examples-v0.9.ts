@@ -18,7 +18,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -71,7 +70,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -144,7 +142,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -249,7 +246,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -329,7 +325,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -412,7 +407,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -505,7 +499,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -597,7 +590,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -678,7 +670,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -752,7 +743,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -832,7 +822,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -960,7 +949,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1030,7 +1018,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1088,7 +1075,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1273,7 +1259,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1353,7 +1338,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1431,7 +1415,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {
@@ -1565,7 +1548,6 @@ export const examplesV09: ExampleV09[] = [
         createSurface: {
           surfaceId: 'main',
           catalogId: 'standard',
-          root: 'root',
         },
       },
       {

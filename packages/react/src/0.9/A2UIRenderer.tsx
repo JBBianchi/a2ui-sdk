@@ -86,11 +86,6 @@ export function A2UIRenderer({
       return null
     }
 
-    const rootId = surface.root
-    if (!rootId) {
-      return null
-    }
-
     return (
       <ErrorProvider onError={onError}>
         <FunctionRegistryProvider registry={functionRegistry}>
@@ -100,7 +95,7 @@ export function A2UIRenderer({
             getSendDataModel={getSendDataModel}
           >
             <ThemeProvider theme={surface.theme}>
-              <ComponentRenderer surfaceId={surfaceId} componentId={rootId} />
+              <ComponentRenderer surfaceId={surfaceId} componentId="root" />
             </ThemeProvider>
           </ActionProvider>
         </FunctionRegistryProvider>
@@ -128,14 +123,9 @@ export function A2UIRenderer({
               return null
             }
 
-            const rootId = surface.root
-            if (!rootId) {
-              return null
-            }
-
             return (
               <ThemeProvider key={id} theme={surface.theme}>
-                <ComponentRenderer surfaceId={id} componentId={rootId} />
+                <ComponentRenderer surfaceId={id} componentId="root" />
               </ThemeProvider>
             )
           })}

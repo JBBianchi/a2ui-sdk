@@ -39,7 +39,6 @@ export interface SurfaceContextValue {
   createSurface: (
     surfaceId: string,
     catalogId: string,
-    root: string,
     theme?: ThemeConfig,
     sendDataModel?: boolean
   ) => void
@@ -101,7 +100,6 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
     (
       surfaceId: string,
       catalogId: string,
-      root: string,
       theme?: ThemeConfig,
       sendDataModel?: boolean
     ) => {
@@ -123,7 +121,6 @@ export function SurfaceProvider({ children }: SurfaceProviderProps) {
         next.set(surfaceId, {
           surfaceId,
           catalogId,
-          root,
           components: new Map(),
           dataModel: {},
           created: true,

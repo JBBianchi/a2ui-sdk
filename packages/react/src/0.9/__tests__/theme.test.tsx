@@ -33,7 +33,7 @@ function SurfaceSetup({
 
   if (setupDone.current === null) {
     setupDone.current = true
-    ctx.createSurface(surfaceId, 'catalog-1', 'root', theme)
+    ctx.createSurface(surfaceId, 'catalog-1', theme)
     ctx.updateComponents(surfaceId, components)
   }
 
