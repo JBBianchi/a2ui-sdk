@@ -7,6 +7,7 @@ import type { SliderComponentProps } from '@a2ui-sdk/types/0.9/standard-catalog'
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useValidationVisibility } from '../../hooks/useValidationVisibility'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -27,6 +28,8 @@ export const SliderComponent = memo(function SliderComponent({
 }: A2UIComponentProps<SliderComponentProps>) {
   const labelText = useStringBinding(surfaceId, label, '')
   const { valid, errors } = useValidation(surfaceId, checks)
+  const { visibleValid, visibleErrors, markInteracted } =
+    useValidationVisibility(valid, errors)
 
   const [sliderValue, setSliderValue] = useFormBinding<number>(
     surfaceId,
@@ -37,10 +40,11 @@ export const SliderComponent = memo(function SliderComponent({
   const handleChange = useCallback(
     (values: number[]) => {
       if (values.length > 0) {
+        markInteracted()
         setSliderValue(values[0])
       }
     },
-    [setSliderValue]
+    [markInteracted, setSliderValue]
   )
 
   const id = `slider-${componentId}`
@@ -58,16 +62,16 @@ export const SliderComponent = memo(function SliderComponent({
         min={min}
         max={max}
         step={1}
-        aria-invalid={!valid}
+        aria-invalid={!visibleValid}
       />
       <div className="flex justify-between text-sm text-muted-foreground">
         <span>{min}</span>
         <span className="font-medium text-foreground">{sliderValue}</span>
         <span>{max}</span>
       </div>
-      {errors.length > 0 && (
+      {visibleErrors.length > 0 && (
         <div className="text-sm text-destructive">
-          {errors.map((error, index) => (
+          {visibleErrors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>

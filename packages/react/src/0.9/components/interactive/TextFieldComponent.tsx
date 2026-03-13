@@ -7,6 +7,7 @@ import type { TextFieldComponentProps } from '@a2ui-sdk/types/0.9/standard-catal
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useValidationVisibility } from '../../hooks/useValidationVisibility'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -66,12 +67,15 @@ export const TextFieldComponent = memo(function TextFieldComponent({
 
   const valid = checksValid && !regexpError
   const errors = regexpError ? [...checksErrors, regexpError] : checksErrors
+  const { visibleValid, visibleErrors, markInteracted } =
+    useValidationVisibility(valid, errors)
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      markInteracted()
       setValue(e.target.value)
     },
-    [setValue]
+    [markInteracted, setValue]
   )
 
   const id = `textfield-${componentId}`
@@ -89,8 +93,8 @@ export const TextFieldComponent = memo(function TextFieldComponent({
           id={id}
           value={value}
           onChange={handleChange}
-          className={cn('min-h-[100px]', !valid && 'border-destructive')}
-          aria-invalid={!valid}
+          className={cn('min-h-[100px]', !visibleValid && 'border-destructive')}
+          aria-invalid={!visibleValid}
         />
       ) : (
         <Input
@@ -98,13 +102,13 @@ export const TextFieldComponent = memo(function TextFieldComponent({
           type={inputType}
           value={value}
           onChange={handleChange}
-          className={cn(!valid && 'border-destructive')}
-          aria-invalid={!valid}
+          className={cn(!visibleValid && 'border-destructive')}
+          aria-invalid={!visibleValid}
         />
       )}
-      {errors.length > 0 && (
+      {visibleErrors.length > 0 && (
         <div className="text-sm text-destructive">
-          {errors.map((error, index) => (
+          {visibleErrors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>

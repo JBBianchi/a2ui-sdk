@@ -9,6 +9,7 @@ import type { ChoicePickerComponentProps } from '@a2ui-sdk/types/0.9/standard-ca
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useValidationVisibility } from '../../hooks/useValidationVisibility'
 import {
   Select,
   SelectContent,
@@ -76,6 +77,8 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
   const labelText = useStringBinding(surfaceId, label, '')
   const isSingleSelection = variant === 'mutuallyExclusive'
   const { valid, errors } = useValidation(surfaceId, checks)
+  const { visibleValid, visibleErrors, markInteracted } =
+    useValidationVisibility(valid, errors)
   const [filter, setFilter] = useState('')
 
   const [selectedValue, setSelectedValue] = useFormBinding<string | string[]>(
@@ -86,13 +89,15 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
 
   const handleSingleChange = useCallback(
     (value: string) => {
+      markInteracted()
       setSelectedValue(value)
     },
-    [setSelectedValue]
+    [markInteracted, setSelectedValue]
   )
 
   const handleMultiChange = useCallback(
     (value: string, checked: boolean) => {
+      markInteracted()
       const currentSelections = Array.isArray(selectedValue)
         ? selectedValue
         : selectedValue
@@ -105,7 +110,7 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
         setSelectedValue(currentSelections.filter((v) => v !== value))
       }
     },
-    [selectedValue, setSelectedValue]
+    [markInteracted, selectedValue, setSelectedValue]
   )
 
   const id = `choicepicker-${componentId}`
@@ -162,9 +167,9 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
               </FilterableOption>
             ))}
           </div>
-          {errors.length > 0 && (
+          {visibleErrors.length > 0 && (
             <div className="text-sm text-destructive">
-              {errors.map((error, index) => (
+              {visibleErrors.map((error, index) => (
                 <p key={index}>{error}</p>
               ))}
             </div>
@@ -179,8 +184,8 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
         <Select value={currentValue} onValueChange={handleSingleChange}>
           <SelectTrigger
             id={id}
-            className={cn(!valid && 'border-destructive')}
-            aria-invalid={!valid}
+            className={cn(!visibleValid && 'border-destructive')}
+            aria-invalid={!visibleValid}
           >
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
@@ -192,9 +197,9 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
             ))}
           </SelectContent>
         </Select>
-        {errors.length > 0 && (
+        {visibleErrors.length > 0 && (
           <div className="text-sm text-destructive">
-            {errors.map((error, index) => (
+            {visibleErrors.map((error, index) => (
               <p key={index}>{error}</p>
             ))}
           </div>
@@ -242,9 +247,9 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
             )
           })}
         </div>
-        {errors.length > 0 && (
+        {visibleErrors.length > 0 && (
           <div className="text-sm text-destructive">
-            {errors.map((error, index) => (
+            {visibleErrors.map((error, index) => (
               <p key={index}>{error}</p>
             ))}
           </div>
@@ -284,9 +289,9 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
           </FilterableOption>
         )
       })}
-      {errors.length > 0 && (
+      {visibleErrors.length > 0 && (
         <div className="text-sm text-destructive">
-          {errors.map((error, index) => (
+          {visibleErrors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>

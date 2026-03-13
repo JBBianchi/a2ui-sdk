@@ -9,6 +9,7 @@ import type { DateTimeInputComponentProps } from '@a2ui-sdk/types/0.9/standard-c
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useValidationVisibility } from '../../hooks/useValidationVisibility'
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 
@@ -31,6 +32,8 @@ export const DateTimeInputComponent = memo(function DateTimeInputComponent({
   const minValue = useStringBinding(surfaceId, minProp, '')
   const maxValue = useStringBinding(surfaceId, maxProp, '')
   const { valid, errors } = useValidation(surfaceId, checks)
+  const { visibleValid, visibleErrors, markInteracted } =
+    useValidationVisibility(valid, errors)
 
   const [dateValue, setDateValue] = useFormBinding<string>(
     surfaceId,
@@ -40,9 +43,10 @@ export const DateTimeInputComponent = memo(function DateTimeInputComponent({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      markInteracted()
       setDateValue(e.target.value)
     },
-    [setDateValue]
+    [markInteracted, setDateValue]
   )
 
   const id = `datetime-${componentId}`
@@ -66,7 +70,7 @@ export const DateTimeInputComponent = memo(function DateTimeInputComponent({
           type={inputType}
           value={dateValue}
           onChange={handleChange}
-          aria-invalid={!valid}
+          aria-invalid={!visibleValid}
           min={minValue || undefined}
           max={maxValue || undefined}
           className={cn(
@@ -74,14 +78,14 @@ export const DateTimeInputComponent = memo(function DateTimeInputComponent({
             'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
             'pr-9 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-9 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer',
-            !valid && 'border-destructive'
+            !visibleValid && 'border-destructive'
           )}
         />
         <Icon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       </div>
-      {errors.length > 0 && (
+      {visibleErrors.length > 0 && (
         <div className="text-sm text-destructive">
-          {errors.map((error, index) => (
+          {visibleErrors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>

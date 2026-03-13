@@ -61,7 +61,7 @@ describe('TextFieldComponent validationRegexp', () => {
     vi.restoreAllMocks()
   })
 
-  it('should show error when input does not match validationRegexp', () => {
+  it('should defer regex validation UI until the user edits the field', () => {
     const components: ComponentDefinition[] = [
       {
         id: 'tf-1',
@@ -84,9 +84,14 @@ describe('TextFieldComponent validationRegexp', () => {
       </TestProvider>
     )
 
-    // The initial value 'not-an-email' does not match the email regex
-    expect(screen.getByText(/does not match pattern/)).toBeInTheDocument()
+    // The initial invalid value stays quiet until the user interacts
+    expect(screen.queryByText(/does not match pattern/)).not.toBeInTheDocument()
     const input = screen.getByLabelText('Email') as HTMLInputElement
+    expect(input).toHaveAttribute('aria-invalid', 'false')
+
+    fireEvent.change(input, { target: { value: 'still-not-an-email' } })
+
+    expect(screen.getByText(/does not match pattern/)).toBeInTheDocument()
     expect(input).toHaveAttribute('aria-invalid', 'true')
   })
 

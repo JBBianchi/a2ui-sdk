@@ -7,6 +7,7 @@ import type { CheckBoxComponentProps } from '@a2ui-sdk/types/0.9/standard-catalo
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
 import { useValidation } from '../../hooks/useValidation'
+import { useValidationVisibility } from '../../hooks/useValidationVisibility'
 import { useScopeBasePath } from '../../contexts/ScopeContext'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -30,13 +31,16 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
     false
   )
   const { valid, errors } = useValidation(surfaceId, checks)
+  const { visibleValid, visibleErrors, markInteracted } =
+    useValidationVisibility(valid, errors)
   const basePath = useScopeBasePath()
 
   const handleChange = useCallback(
     (newChecked: boolean) => {
+      markInteracted()
       setChecked(newChecked)
     },
-    [setChecked]
+    [markInteracted, setChecked]
   )
 
   // Include basePath in ID to ensure uniqueness in templated lists
@@ -54,7 +58,7 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
           id={id}
           checked={checked}
           onCheckedChange={handleChange}
-          aria-invalid={!valid}
+          aria-invalid={!visibleValid}
         />
         {labelText && (
           <Label htmlFor={id} className="cursor-pointer">
@@ -62,9 +66,9 @@ export const CheckBoxComponent = memo(function CheckBoxComponent({
           </Label>
         )}
       </div>
-      {errors.length > 0 && (
+      {visibleErrors.length > 0 && (
         <div className="text-sm text-destructive ml-6">
-          {errors.map((error, index) => (
+          {visibleErrors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>
