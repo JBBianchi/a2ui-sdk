@@ -78,16 +78,25 @@ export const ComponentRenderer = memo(function ComponentRenderer({
   // Add to rendering set for circular reference detection
   renderingComponents.add(renderKey)
 
-  // Extract props from component, excluding 'component' (the type discriminator), 'id',
-  // 'accessibility', and '_generation' (internal type-change counter)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {
-    component: _type,
-    id: _id,
-    accessibility,
-    _generation,
-    ...props
-  } = component
+  const accessibility = component.accessibility as
+    | AccessibilityAttributes
+    | undefined
+  const _generation = component._generation as number | undefined
+
+  // Build props by excluding metadata fields (type discriminator, id,
+  // accessibility, and _generation which is an internal type-change counter)
+  const metadataKeys = new Set([
+    'component',
+    'id',
+    'accessibility',
+    '_generation',
+  ])
+  const props: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(component)) {
+    if (!metadataKeys.has(key)) {
+      props[key] = value
+    }
+  }
 
   // Use _generation in the key so that component type changes force a full
   // unmount/remount, resetting any internal React state from the previous type.

@@ -80,10 +80,16 @@ describe('Schema Validation (T092a)', () => {
       expect(oneOf.length).toBeGreaterThanOrEqual(3) // at least createSurface, updateComponents, updateDataModel
     })
 
-    it('should define version as optional string property', () => {
-      const props = schema.properties as Record<string, Record<string, unknown>>
-      expect(props.version).toBeDefined()
-      expect(props.version.type).toBe('string')
+    it('should define version as const per-message property', () => {
+      // In upstream 0.9, version is a per-message const "v0.9" property, not a top-level optional string
+      const defs = schema.$defs as Record<string, Record<string, unknown>>
+      const createSurface = defs.CreateSurfaceMessage as Record<string, unknown>
+      const createProps = createSurface.properties as Record<
+        string,
+        Record<string, unknown>
+      >
+      expect(createProps.version).toBeDefined()
+      expect(createProps.version.const).toBe('v0.9')
     })
   })
 
@@ -103,18 +109,12 @@ describe('Schema Validation (T092a)', () => {
       expect(required).toContain('context')
     })
 
-    it('should define action.dataModel as optional', () => {
-      const props = schema.properties as Record<string, Record<string, unknown>>
-      const action = props.action as Record<string, unknown>
-      const actionProps = action.properties as Record<
-        string,
-        Record<string, unknown>
-      >
-
-      // dataModel should be defined in properties but NOT in required
-      expect(actionProps.dataModel).toBeDefined()
-      const required = action.required as string[]
-      expect(required).not.toContain('dataModel')
+    it('should require version in action oneOf', () => {
+      const oneOf = schema.oneOf as Array<Record<string, string[]>>
+      // Upstream requires version alongside action or error
+      const actionReq = oneOf.find((o) => o.required?.includes('action'))
+      expect(actionReq).toBeDefined()
+      expect(actionReq!.required).toContain('version')
     })
 
     it('should define error with VALIDATION_FAILED variant', () => {

@@ -39,7 +39,7 @@ const variantStyles: Record<string, string> = {
 export const ImageComponent = memo(function ImageComponent({
   surfaceId,
   url,
-  fit = 'cover',
+  fit = 'fill',
   variant,
   weight,
 }: A2UIComponentProps<ImageComponentProps>) {

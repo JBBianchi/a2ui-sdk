@@ -74,19 +74,15 @@ export interface DeleteSurfacePayload {
 export interface FunctionCall {
   call: string
   args?: Record<string, DynamicValue>
-  returnType?: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'any'
+  returnType?:
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'array'
+    | 'object'
+    | 'any'
+    | 'void'
 }
-
-/**
- * Logic expression for boolean evaluation.
- */
-export type LogicExpression =
-  | { and: LogicExpression[] }
-  | { or: LogicExpression[] }
-  | { not: LogicExpression }
-  | FunctionCall
-  | { true: true }
-  | { false: false }
 
 /**
  * Generic dynamic value (any type).

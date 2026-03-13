@@ -86,7 +86,7 @@ describe('Image component props', () => {
     expect(img.className).toContain('object-scale-down')
   })
 
-  it('should apply object-cover class by default', () => {
+  it('should apply object-fill class by default', () => {
     const components: ComponentDefinition[] = [
       {
         id: 'img-1',
@@ -105,7 +105,7 @@ describe('Image component props', () => {
 
     const img = document.querySelector('img')!
     expect(img).toBeInTheDocument()
-    expect(img.className).toContain('object-cover')
+    expect(img.className).toContain('object-fill')
   })
 
   it('should apply object-contain class for fit="contain"', () => {

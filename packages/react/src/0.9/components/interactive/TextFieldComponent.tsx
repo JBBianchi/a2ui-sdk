@@ -2,7 +2,7 @@
  * TextFieldComponent - Text input field with two-way binding.
  */
 
-import { memo, useCallback, useMemo } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import type { TextFieldComponentProps } from '@a2ui-sdk/types/0.9/standard-catalog'
 import type { A2UIComponentProps } from '@/0.9/components/types'
 import { useStringBinding, useFormBinding } from '../../hooks/useDataBinding'
@@ -36,7 +36,15 @@ export const TextFieldComponent = memo(function TextFieldComponent({
   validationRegexp,
 }: A2UIComponentProps<TextFieldComponentProps>) {
   const labelText = useStringBinding(surfaceId, label, '')
-  const [value, setValue] = useFormBinding<string>(surfaceId, valueProp, '')
+  const [localValue, setLocalValue] = useState('')
+  const [boundValue, setBoundValue] = useFormBinding<string>(
+    surfaceId,
+    valueProp,
+    ''
+  )
+  const hasBinding = valueProp != null
+  const value = hasBinding ? boundValue : localValue
+  const setValue = hasBinding ? setBoundValue : setLocalValue
   const { valid: checksValid, errors: checksErrors } = useValidation(
     surfaceId,
     checks

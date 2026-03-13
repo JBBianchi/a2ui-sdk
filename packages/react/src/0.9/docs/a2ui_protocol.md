@@ -577,7 +577,7 @@ This message is sent when the user interacts with a component that has an `actio
 
 Client capabilities are sent by the client to inform the server of its capabilities, including supported catalogs (components and functions). In A2UI v0.9, these are sent as part of the **A2A metadata** envelope in every message, rather than as a first-class A2UI message. This ensures the server always has the client's latest capabilities without needing a separate handshake.
 
-The `a2uiClientCapabilities` object in the metadata follows the [`a2ui_client_capabilities_schema.json`] schema.
+The `a2uiClientCapabilities` object in the metadata follows the [`client_capabilities.json`] schema.
 
 **Properties:**
 
@@ -592,6 +592,6 @@ This message is used to report a client-side error to the server.
 [`common_types.json`]: ../json/common_types.json
 [`server_to_client.json`]: ../json/server_to_client.json
 [`client_to_server.json`]: ../json/client_to_server.json
-[`a2ui_client_capabilities_schema.json`]: ../json/a2ui_client_capabilities_schema.json
+[`client_capabilities.json`]: ../json/client_capabilities.json
 [JSON Pointer]: https://datatracker.ietf.org/doc/html/rfc6901
 [RFC 6901]: https://datatracker.ietf.org/doc/html/rfc6901

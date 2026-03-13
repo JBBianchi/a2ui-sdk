@@ -143,12 +143,13 @@ describe('ChoicePickerComponent features', () => {
   })
 
   describe('displayStyle="checkbox" (default)', () => {
-    it('should render checkboxes by default', () => {
+    it('should render checkboxes when variant is multipleSelection', () => {
       const components: ComponentDefinition[] = [
         {
           id: 'picker-1',
           component: 'ChoicePicker',
           label: 'Pick Fruits',
+          variant: 'multipleSelection',
           options: [
             { value: 'apple', label: 'Apple' },
             { value: 'banana', label: 'Banana' },
@@ -183,6 +184,7 @@ describe('ChoicePickerComponent features', () => {
           id: 'picker-1',
           component: 'ChoicePicker',
           label: 'Pick Items',
+          variant: 'multipleSelection',
           displayStyle: 'checkbox',
           options: [
             { value: 'a', label: 'A' },
@@ -217,6 +219,7 @@ describe('ChoicePickerComponent features', () => {
           id: 'picker-1',
           component: 'ChoicePicker',
           label: 'Pick Language',
+          variant: 'multipleSelection',
           filterable: true,
           options: [
             { value: 'js', label: 'JavaScript' },
@@ -280,6 +283,7 @@ describe('ChoicePickerComponent features', () => {
           id: 'picker-1',
           component: 'ChoicePicker',
           label: 'Pick Language',
+          variant: 'multipleSelection',
           filterable: true,
           options: [
             { value: 'js', label: 'JavaScript' },

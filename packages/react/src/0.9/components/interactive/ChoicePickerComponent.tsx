@@ -65,7 +65,7 @@ export const ChoicePickerComponent = memo(function ChoicePickerComponent({
   surfaceId,
   componentId,
   label,
-  variant = 'multipleSelection',
+  variant = 'mutuallyExclusive',
   options,
   value: valueProp,
   displayStyle = 'checkbox',

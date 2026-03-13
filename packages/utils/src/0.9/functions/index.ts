@@ -8,7 +8,14 @@
  */
 export interface FunctionImplementation {
   name: string
-  returnType: 'string' | 'number' | 'boolean' | 'void'
+  returnType:
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'void'
+    | 'array'
+    | 'object'
+    | 'any'
   execute(
     args: Record<string, unknown>,
     dataModel: Record<string, unknown>,

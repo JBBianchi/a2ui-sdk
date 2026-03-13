@@ -162,8 +162,8 @@ type DynamicString = string | { path: string } | FunctionCall
 // Static number or path reference
 type DynamicNumber = number | { path: string } | FunctionCall
 
-// Static boolean or logic expression
-type DynamicBoolean = boolean | { path: string } | LogicExpression
+// Static boolean, path, or function call returning boolean
+type DynamicBoolean = boolean | { path: string } | FunctionCall
 ```
 
 ### ValueSource (v0.8)
