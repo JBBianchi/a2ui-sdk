@@ -45,5 +45,8 @@
     "website",
     "playground",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "radix-ui": "^1.4.3"
+  }
 }

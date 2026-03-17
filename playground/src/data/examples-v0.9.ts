@@ -490,6 +490,180 @@ export const examplesV09: ExampleV09[] = [
     ],
   },
   {
+    id: 'rich-choice-picker',
+    title: 'Rich Choice Picker',
+    description:
+      'Custom rich_catalog example covering card, rich select, searchable combobox, and multi-select popup modes',
+    group: 'Custom Catalogs',
+    messages: [
+      {
+        createSurface: {
+          surfaceId: 'main',
+          catalogId: 'https://a2ui-sdk.js.org/catalogs/rich_catalog.json',
+        },
+      },
+      {
+        updateComponents: {
+          surfaceId: 'main',
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              children: [
+                'heading',
+                'description',
+                'plan-select',
+                'workspace-combobox',
+                'addons-panel',
+                'card-baseline',
+              ],
+            },
+            {
+              id: 'heading',
+              component: 'Text',
+              text: 'Rich Choice Picker',
+              variant: 'h2',
+            },
+            {
+              id: 'description',
+              component: 'Text',
+              text: 'This surface uses a dedicated `rich_catalog.json` that extends the basic catalog with a Markdown-aware `RichChoicePicker`, covering non-searchable select, searchable combobox, multi-select popup, and card layout behaviors.',
+              variant: 'body',
+            },
+            {
+              id: 'plan-select',
+              component: 'RichChoicePicker',
+              label: '### Choose a **hosting plan**',
+              value: { path: '/selectedPlanSelect' },
+              variant: 'mutuallyExclusive',
+              displayStyle: 'select',
+              filterable: false,
+              options: [
+                {
+                  label: '**Starter**',
+                  description:
+                    'Good for _small pilots_ and demos.\n\n- Shared environment\n- Community support',
+                  value: 'starter',
+                },
+                {
+                  label: '**Pro**',
+                  description:
+                    'Balanced option for production teams.\n\n- Priority email support\n- Daily backups\n- SLA reporting',
+                  value: 'pro',
+                },
+                {
+                  label: '**Enterprise**',
+                  description:
+                    'Built for regulated or high-scale workloads.\n\n- Dedicated infrastructure\n- SSO / SCIM\n- 24/7 response',
+                  value: 'enterprise',
+                },
+              ],
+            },
+            {
+              id: 'workspace-combobox',
+              component: 'RichChoicePicker',
+              label: '### Search for the right **workspace profile**',
+              value: { path: '/selectedWorkspaceProfile' },
+              variant: 'mutuallyExclusive',
+              displayStyle: 'select',
+              filterable: true,
+              options: [
+                {
+                  label: '**Product squad**',
+                  description:
+                    'Best for fast-moving teams shipping weekly.\n\n- Shared planning rituals\n- Lightweight governance',
+                  value: 'product-squad',
+                },
+                {
+                  label: '**Operations hub**',
+                  description:
+                    'Built for runbooks, approvals, and audit-friendly change control.\n\n- Shift handoffs\n- Queue monitoring',
+                  value: 'operations-hub',
+                },
+                {
+                  label: '**Innovation lab**',
+                  description:
+                    'Optimized for experiments, pilots, and high-context discovery work.\n\n- Prototype spaces\n- Research notes',
+                  value: 'innovation-lab',
+                },
+              ],
+            },
+            {
+              id: 'addons-panel',
+              component: 'RichChoicePicker',
+              label: '### Pick any **launch add-ons**',
+              value: { path: '/selectedAddonsPanel' },
+              variant: 'multipleSelection',
+              displayStyle: 'select',
+              filterable: true,
+              options: [
+                {
+                  label: '**Managed onboarding**',
+                  description:
+                    'A guided rollout with checklists, office hours, and a shared launch plan.',
+                  value: 'onboarding',
+                },
+                {
+                  label: '**Premium support**',
+                  description:
+                    'Faster response times plus a dedicated escalation path for critical incidents.',
+                  value: 'support',
+                },
+                {
+                  label: '**Usage analytics**',
+                  description:
+                    'Dashboards with _engagement_ and **conversion** metrics for every surface.',
+                  value: 'analytics',
+                },
+              ],
+            },
+            {
+              id: 'card-baseline',
+              component: 'RichChoicePicker',
+              label: '### Card-style **support package** baseline',
+              value: { path: '/selectedSupportPackages' },
+              variant: 'multipleSelection',
+              displayStyle: 'card',
+              filterable: true,
+              options: [
+                {
+                  label: '**Launch readiness review**',
+                  description:
+                    'A structured preflight covering permissions, rollout sequencing, and contingency planning.',
+                  value: 'readiness-review',
+                },
+                {
+                  label: '**Embedded coaching**',
+                  description:
+                    'Hands-on help for change champions with office hours, templates, and decision support.',
+                  value: 'embedded-coaching',
+                },
+                {
+                  label: '**Executive digest**',
+                  description:
+                    'A concise weekly brief with **milestones**, open risks, and momentum signals.',
+                  value: 'executive-digest',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        updateDataModel: {
+          surfaceId: 'main',
+          path: '/',
+          value: {
+            selectedPlanSelect: 'pro',
+            selectedWorkspaceProfile: 'operations-hub',
+            selectedAddonsPanel: ['support', 'analytics'],
+            selectedSupportPackages: ['embedded-coaching'],
+          },
+        },
+      },
+    ],
+  },
+  {
     id: 'slider',
     title: 'Slider',
     description: 'Slider component with min/max range',
