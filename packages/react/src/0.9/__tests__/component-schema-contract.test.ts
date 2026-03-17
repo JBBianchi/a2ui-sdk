@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { standardCatalog } from '../standard-catalog'
+import { basicCatalog } from '../basic-catalog'
 import {
   getSchemaComponentContracts,
   getTypeScriptComponentContracts,
@@ -14,9 +14,9 @@ describe('v0.9 component schema contract alignment', () => {
   const typeContracts = getTypeScriptComponentContracts()
   const schemaComponentNames = sortedKeys(schemaContracts)
   const typeComponentNames = sortedKeys(typeContracts)
-  const registryComponentNames = sortedKeys(standardCatalog.components)
+  const registryComponentNames = sortedKeys(basicCatalog.components)
 
-  it('matches component names across schema, types, and standard catalog', () => {
+  it('matches component names across schema, types, and the basic catalog', () => {
     expect(typeComponentNames).toEqual(schemaComponentNames)
     expect(registryComponentNames).toEqual(schemaComponentNames)
   })

@@ -12,7 +12,7 @@ import {
   useComponentsMapContext,
 } from './ComponentsMapContext'
 import { A2UIProvider } from './A2UIProvider'
-import { standardCatalog } from '../standard-catalog'
+import { basicCatalog } from '../basic-catalog'
 import { type ReactNode } from 'react'
 
 /**
@@ -263,19 +263,19 @@ describe('A2UIProvider', () => {
       })
 
       expect(result.current.getComponent('Text')).toBe(CustomText)
-      // Other standard components should not be available
+      // Other built-in components should not be available
       expect(result.current.getComponent('Button')).toBeUndefined()
     })
 
-    it('should allow extending standard catalog with custom components', () => {
+    it('should allow extending the basic catalog with custom components', () => {
       function CustomChart() {
         return <div>Chart</div>
       }
 
       const extendedCatalog = {
-        ...standardCatalog,
+        ...basicCatalog,
         components: {
-          ...standardCatalog.components,
+          ...basicCatalog.components,
           CustomChart,
         },
       }
@@ -292,12 +292,12 @@ describe('A2UIProvider', () => {
 
       // Custom component should be available
       expect(result.current.getComponent('CustomChart')).toBe(CustomChart)
-      // Standard components should still be available
+      // Built-in components should still be available
       expect(result.current.getComponent('Text')).toBeDefined()
       expect(result.current.getComponent('Button')).toBeDefined()
     })
 
-    it('should use standard catalog when no catalog is provided', () => {
+    it('should use the built-in basic catalog when no catalog is provided', () => {
       const wrapper = ({ children }: { children: ReactNode }) => (
         <A2UIProvider messages={[]}>{children}</A2UIProvider>
       )
@@ -306,7 +306,7 @@ describe('A2UIProvider', () => {
         wrapper,
       })
 
-      // Standard components should be available
+      // Built-in components should be available
       expect(result.current.getComponent('Text')).toBeDefined()
       expect(result.current.getComponent('Button')).toBeDefined()
       expect(result.current.getComponent('Row')).toBeDefined()

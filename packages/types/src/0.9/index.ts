@@ -318,3 +318,4 @@ export interface ErrorPayload {
 export type ErrorHandler = (error: ErrorPayload) => void
 
 export * as StandardCatalog from './standard-catalog.js'
+export * as BasicCatalog from './standard-catalog.js'

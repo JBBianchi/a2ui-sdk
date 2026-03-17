@@ -166,22 +166,22 @@ function App() {
 
 #### Custom Components
 
-Override or extend the standard catalog the same way as in v0.8:
+Override or extend the v0.9 basic catalog the same way as in v0.8. The older `standardCatalog` name remains available as an alias:
 
 ```tsx
 import {
   A2UIProvider,
   A2UIRenderer,
-  standardCatalog,
+  basicCatalog,
   type A2UIMessage,
   type A2UIAction,
 } from '@a2ui-sdk/react/0.9'
 
-// Extend standard catalog with custom components
+// Extend the basic catalog with custom components
 const customCatalog = {
-  ...standardCatalog,
+  ...basicCatalog,
   components: {
-    ...standardCatalog.components,
+    ...basicCatalog.components,
     // Override default components or add new ones
     Button: CustomButtonComponent,
   },
@@ -208,7 +208,12 @@ import {
   ComponentRenderer,
 
   // Catalog
+  basicCatalog,
   standardCatalog,
+
+  // Function registry helpers
+  createBasicFunctionRegistry,
+  createStandardFunctionRegistry,
 
   // Hooks
   useDispatchAction,

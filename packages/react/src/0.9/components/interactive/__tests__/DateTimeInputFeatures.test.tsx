@@ -13,13 +13,13 @@ import { ComponentsMapProvider } from '../../../contexts/ComponentsMapContext'
 import { ComponentRenderer } from '../../ComponentRenderer'
 import { useRef, type ReactNode } from 'react'
 import type { ComponentDefinition } from '@a2ui-sdk/types/0.9'
-import { standardCatalog } from '../../../standard-catalog'
+import { basicCatalog } from '../../../basic-catalog'
 
 function TestProvider({ children }: { children: ReactNode }) {
   return (
     <SurfaceProvider>
       <ActionProvider>
-        <ComponentsMapProvider components={standardCatalog.components}>
+        <ComponentsMapProvider components={basicCatalog.components}>
           {children}
         </ComponentsMapProvider>
       </ActionProvider>

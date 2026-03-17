@@ -23,8 +23,8 @@ Version 0.9 represents a fundamental philosophical shift from "Structured Output
 | **Data Model Update** | Array of Key-Value Pairs                 | Standard JSON Object                                 |
 | **Data Binding**      | `dataBinding` / `literalString`          | `path` / Native JSON types                           |
 | **Button Context**    | Array of Key-Value pairs                 | Standard JSON Object                                 |
-| **Catalog**           | Separate component and function catalogs | Unified Catalog (`standard_catalog.json`)            |
-| **Auxiliary Rules**   | N/A                                      | `standard_catalog_rules.txt`                         |
+| **Catalog**           | Separate component and function catalogs | Unified Catalog (`basic_catalog.json`)               |
+| **Auxiliary Rules**   | N/A                                      | `basic_catalog_rules.txt`                            |
 | **Validation**        | Basic Schema                             | Strict `ValidationFailed` feedback loop              |
 | **Interpolation**     | N/A (Object wrappers only)               | Native `${expression}` syntax                        |
 
@@ -42,8 +42,8 @@ Version 0.9 represents a fundamental philosophical shift from "Structured Output
 - **Modularization**: The schema is strictly split into:
   - `common_types.json`: Reusable primitives (IDs, paths, weights) and logic/expression types.
   - `server_to_client.json`: The "envelope" defining the message types.
-  - `standard_catalog.json`: The unified catalog of UI components and functions.
-- **Benefit**: This allows developers to swap out the `standard_catalog.json` for a `custom_catalog.json` without touching the core protocol envelope.
+  - `basic_catalog.json`: The unified catalog of UI components and functions.
+- **Benefit**: This allows developers to swap out the `basic_catalog.json` for a `custom_catalog.json` without touching the core protocol envelope.
 - **Unification**: Components and functions are now part of the same catalog object, simplifying capability negotiation and inline definitions.
 
 ### 2.2. Strict Message Typing
@@ -62,7 +62,7 @@ Version 0.9 represents a fundamental philosophical shift from "Structured Output
 
 **v0.9:**
 
-- **New Artifact**: `standard_catalog_rules.txt`.
+- **New Artifact**: `basic_catalog_rules.txt`.
 - **Purpose**: A plain-text prompt fragment containing rules for using the catalog schema (e.g., "MUST provide 'action' for Button").
 - **Usage**: Designed to be included in the system prompt alongside the catalog schema.
 - **Reason**: Some constraints (like conditional requirements or specific property combinations) are difficult or verbose to express in JSON Schema but easy to express in natural language rules for an LLM, and it can be packaged with the catalog schema for ease of customizing the prompt for a particular catalog.
@@ -107,7 +107,7 @@ Version 0.9 represents a fundamental philosophical shift from "Structured Output
 {
   "createSurface": {
     "surfaceId": "user_profile_card",
-    "catalogId": "https://a2ui.dev/specification/0.9/standard_catalog.json"
+    "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json"
   }
 }
 ```

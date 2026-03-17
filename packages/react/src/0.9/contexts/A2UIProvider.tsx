@@ -6,8 +6,13 @@
  *
  * @example
  * ```tsx
- * import { A2UIProvider, A2UIRenderer, A2UIMessage, A2UIAction } from '@a2ui-sdk/react/0.9'
- * import { standardCatalog } from '@a2ui-sdk/react/0.9/standard-catalog'
+ * import {
+ *   A2UIProvider,
+ *   A2UIRenderer,
+ *   basicCatalog,
+ *   A2UIMessage,
+ *   A2UIAction,
+ * } from '@a2ui-sdk/react/0.9'
  *
  * function App() {
  *   const messages: A2UIMessage[] = [...]
@@ -21,12 +26,12 @@
  *   )
  * }
  *
- * // With extended catalog (add custom components on top of standard)
+ * // With extended catalog (add custom components on top of the basic catalog)
  * function AppWithExtendedCatalog() {
  *   const extendedCatalog = {
- *     ...standardCatalog,
+ *     ...basicCatalog,
  *     components: {
- *       ...standardCatalog.components,
+ *       ...basicCatalog.components,
  *       CustomChart: MyChartComponent,
  *     },
  *   }
@@ -57,7 +62,7 @@ import { SurfaceProvider } from './SurfaceContext'
 import { ComponentsMapProvider } from './ComponentsMapContext'
 import type { A2UIMessage } from '@a2ui-sdk/types/0.9'
 import { useA2UIMessageHandler } from '../hooks/useA2UIMessageHandler'
-import { standardCatalog, type Catalog } from '../standard-catalog'
+import { basicCatalog, type Catalog } from '../basic-catalog'
 
 /**
  * Props for A2UIProvider.
@@ -71,14 +76,14 @@ export interface A2UIProviderProps {
   messages?: A2UIMessage[]
   /**
    * Catalog containing components and functions.
-   * Use `standardCatalog` from '@a2ui-sdk/react/0.9/standard-catalog' as base.
+   * Use `basicCatalog` from '@a2ui-sdk/react/0.9' as the bundled v0.9 base catalog.
    *
    * @example
    * ```tsx
-   * // Extend standard catalog
+   * // Extend the basic catalog
    * const catalog = {
-   *   ...standardCatalog,
-   *   components: { ...standardCatalog.components, Custom: MyComponent },
+   *   ...basicCatalog,
+   *   components: { ...basicCatalog.components, Custom: MyComponent },
    * }
    * ```
    */
@@ -126,18 +131,18 @@ function A2UIMessageProcessor({
  *
  * @example
  * ```tsx
- * import { standardCatalog } from '@a2ui-sdk/react/0.9/standard-catalog'
+ * import { basicCatalog } from '@a2ui-sdk/react/0.9'
  *
- * // Basic usage (uses standard catalog by default)
+ * // Basic usage (uses the built-in basic catalog by default)
  * <A2UIProvider messages={messages}>
  *   <A2UIRenderer onAction={handleAction} />
  * </A2UIProvider>
  *
  * // With extended catalog
  * const extendedCatalog = {
- *   ...standardCatalog,
+ *   ...basicCatalog,
  *   components: {
- *     ...standardCatalog.components,
+ *     ...basicCatalog.components,
  *     CustomChart: MyChartComponent,
  *   },
  * }
@@ -168,8 +173,8 @@ export function A2UIProvider({
 }: A2UIProviderProps) {
   // Determine the components to use:
   // 1. If catalog is provided, use catalog.components directly
-  // 2. Otherwise, use standard catalog
-  const effectiveCatalog = catalog ?? standardCatalog
+  // 2. Otherwise, use the bundled basic catalog
+  const effectiveCatalog = catalog ?? basicCatalog
 
   return (
     <SurfaceProvider>

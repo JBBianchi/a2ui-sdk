@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createStandardFunctionRegistry } from '../standard-catalog'
+import { createBasicFunctionRegistry } from '../basic-catalog'
 import { getSchemaFunctionContracts } from './schema-contract.utils'
 
 function getRegisteredFunctionNames(registry: object): string[] {
@@ -41,10 +41,10 @@ function getRegisteredReturnType(
 
 describe('v0.9 function schema contract alignment', () => {
   const schemaContracts = getSchemaFunctionContracts()
-  const registry = createStandardFunctionRegistry()
+  const registry = createBasicFunctionRegistry()
   const schemaFunctionNames = Object.keys(schemaContracts).sort()
 
-  it('matches function names between schema and standard function registry', () => {
+  it('matches function names between schema and the basic function registry', () => {
     expect(getRegisteredFunctionNames(registry)).toEqual(schemaFunctionNames)
   })
 

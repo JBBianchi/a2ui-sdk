@@ -72,7 +72,7 @@ export type {
   Catalog,
   CatalogComponent,
   CatalogComponents,
-} from './standard-catalog'
+} from './basic-catalog'
 
 // ============ Components ============
 
@@ -80,9 +80,13 @@ export { A2UIProvider } from './contexts/A2UIProvider'
 export { A2UIRenderer } from './A2UIRenderer'
 export { ComponentRenderer } from './components/ComponentRenderer'
 export {
+  basicCatalog,
+  basicComponents,
+  basicFunctions,
+  createBasicFunctionRegistry,
   standardCatalog,
   createStandardFunctionRegistry,
-} from './standard-catalog'
+} from './basic-catalog'
 
 // ============ Hooks ============
 

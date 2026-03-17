@@ -6,7 +6,7 @@ The TypeScript/React SDK for [A2UI](https://a2ui.org) protocol.
 
 NOTE: this is NOT the official SDK maintained by the A2UI team.
 
-Supports all components in A2UI standard catalog out of the box. Built with [shadcn/ui](https://ui.shadcn.com/) and [Tailwind CSS](https://tailwindcss.com/).
+Supports all built-in A2UI catalog components out of the box. Built with [shadcn/ui](https://ui.shadcn.com/) and [Tailwind CSS](https://tailwindcss.com/).
 
 Currently both A2UI protocol v0.8 and v0.9 are supported.
 
@@ -228,4 +228,4 @@ function MyApp() {
 }
 ```
 
-Additionally, override or extend the standard catalog the same way as in v0.8.
+Additionally, override or extend the v0.9 basic catalog the same way as in v0.8. The older `standardCatalog` name remains available as an alias.

@@ -8,12 +8,12 @@ import {
 import {
   A2UIProvider as A2UIProviderV09,
   A2UIRenderer as A2UIRendererV09,
-  createStandardFunctionRegistry,
+  createBasicFunctionRegistry,
   type A2UIMessage as A2UIMessageV09,
   type A2UIAction as A2UIActionV09,
 } from '@a2ui-sdk/react/0.9'
 
-const functionRegistryV09 = createStandardFunctionRegistry()
+const functionRegistryV09 = createBasicFunctionRegistry()
 import { ErrorDisplay } from './ErrorDisplay'
 import type { A2UIVersion } from './VersionSelector'
 

@@ -7,7 +7,7 @@ import { SurfaceProvider, useSurfaceContext } from '../contexts/SurfaceContext'
 import { ActionProvider } from '../contexts/ActionContext'
 import { ComponentsMapProvider } from '../contexts/ComponentsMapContext'
 import { ComponentRenderer } from '../components/ComponentRenderer'
-import { standardCatalog } from '../standard-catalog'
+import { basicCatalog } from '../basic-catalog/index.js'
 import type { ComponentDefinition } from '@a2ui-sdk/types/0.9'
 import {
   componentSmokeScenarios,
@@ -44,7 +44,7 @@ function TestProvider({ children }: { children: ReactNode }) {
   return (
     <SurfaceProvider>
       <ActionProvider>
-        <ComponentsMapProvider components={standardCatalog.components}>
+        <ComponentsMapProvider components={basicCatalog.components}>
           {children}
         </ComponentsMapProvider>
       </ActionProvider>
