@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2ui-sdk.js.org/catalogs/rich_catalog.json",
+  "title": "A2UI Rich Catalog",
+  "description": "A standalone catalog that extends the A2UI basic catalog with a Markdown-aware RichChoicePicker component.",
+  "catalogId": "https://a2ui-sdk.js.org/catalogs/rich_catalog.json",
+  "components": {
+    "Text": {
+      "$ref": "basic_catalog.json#/components/Text"
+    },
+    "Image": {
+      "$ref": "basic_catalog.json#/components/Image"
+    },
+    "Icon": {
+      "$ref": "basic_catalog.json#/components/Icon"
+    },
+    "Video": {
+      "$ref": "basic_catalog.json#/components/Video"
+    },
+    "AudioPlayer": {
+      "$ref": "basic_catalog.json#/components/AudioPlayer"
+    },
+    "Row": {
+      "$ref": "basic_catalog.json#/components/Row"
+    },
+    "Column": {
+      "$ref": "basic_catalog.json#/components/Column"
+    },
+    "List": {
+      "$ref": "basic_catalog.json#/components/List"
+    },
+    "Card": {
+      "$ref": "basic_catalog.json#/components/Card"
+    },
+    "Tabs": {
+      "$ref": "basic_catalog.json#/components/Tabs"
+    },
+    "Modal": {
+      "$ref": "basic_catalog.json#/components/Modal"
+    },
+    "Divider": {
+      "$ref": "basic_catalog.json#/components/Divider"
+    },
+    "Button": {
+      "$ref": "basic_catalog.json#/components/Button"
+    },
+    "TextField": {
+      "$ref": "basic_catalog.json#/components/TextField"
+    },
+    "CheckBox": {
+      "$ref": "basic_catalog.json#/components/CheckBox"
+    },
+    "ChoicePicker": {
+      "$ref": "basic_catalog.json#/components/ChoicePicker"
+    },
+    "Slider": {
+      "$ref": "basic_catalog.json#/components/Slider"
+    },
+    "DateTimeInput": {
+      "$ref": "basic_catalog.json#/components/DateTimeInput"
+    },
+    "RichChoicePicker": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "basic_catalog.json#/$defs/CatalogComponentCommon"
+        },
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "description": "A richer choice picker that renders its label and each option description as Markdown. It supports both rich card layouts and select-style pickers where the selected state can also show label and description content.",
+          "properties": {
+            "component": {
+              "const": "RichChoicePicker"
+            },
+            "label": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "The heading shown above the choice group. Plain text is valid, but the renderer may interpret Markdown formatting."
+            },
+            "variant": {
+              "type": "string",
+              "description": "Controls whether the user can pick one option or many options.",
+              "enum": ["multipleSelection", "mutuallyExclusive"],
+              "default": "mutuallyExclusive"
+            },
+            "displayStyle": {
+              "type": "string",
+              "description": "Controls whether options render as rich cards or as a compact select-style picker. `card` keeps the rich card list presentation. `select` uses a popup-based single-select, combobox, or multi-select checklist depending on `variant` and `filterable`.",
+              "enum": ["card", "select"],
+              "default": "card"
+            },
+            "options": {
+              "type": "array",
+              "description": "The list of available options to choose from.",
+              "items": {
+                "$ref": "#/$defs/RichChoiceOption"
+              }
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "$ref": "common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "$ref": "#/$defs/RichChoiceSelection"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/RichChoiceSelection"
+                  }
+                }
+              ],
+              "description": "The selected value stored in the data model. In mutually exclusive mode, bind this to one object like `{ \"value\": \"starter\", \"label\": \"**Starter**\" }`. In multiple selection mode, bind it to an array of those objects."
+            },
+            "filterable": {
+              "type": "boolean",
+              "description": "Controls visible search UI. `card` + `true` shows a separate inline filter above the card list. `select` + `true` merges search into the popup for searchable combobox or multi-select panel behavior. `false` renders no visible search UI.",
+              "default": false
+            }
+          },
+          "required": ["component", "options", "value"]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  },
+  "functions": {
+    "required": {
+      "$ref": "basic_catalog.json#/functions/required"
+    },
+    "regex": {
+      "$ref": "basic_catalog.json#/functions/regex"
+    },
+    "length": {
+      "$ref": "basic_catalog.json#/functions/length"
+    },
+    "numeric": {
+      "$ref": "basic_catalog.json#/functions/numeric"
+    },
+    "email": {
+      "$ref": "basic_catalog.json#/functions/email"
+    },
+    "formatString": {
+      "$ref": "basic_catalog.json#/functions/formatString"
+    },
+    "formatNumber": {
+      "$ref": "basic_catalog.json#/functions/formatNumber"
+    },
+    "formatCurrency": {
+      "$ref": "basic_catalog.json#/functions/formatCurrency"
+    },
+    "formatDate": {
+      "$ref": "basic_catalog.json#/functions/formatDate"
+    },
+    "pluralize": {
+      "$ref": "basic_catalog.json#/functions/pluralize"
+    },
+    "openUrl": {
+      "$ref": "basic_catalog.json#/functions/openUrl"
+    },
+    "and": {
+      "$ref": "basic_catalog.json#/functions/and"
+    },
+    "or": {
+      "$ref": "basic_catalog.json#/functions/or"
+    },
+    "not": {
+      "$ref": "basic_catalog.json#/functions/not"
+    }
+  },
+  "$defs": {
+    "CatalogComponentCommon": {
+      "$ref": "basic_catalog.json#/$defs/CatalogComponentCommon"
+    },
+    "theme": {
+      "$ref": "basic_catalog.json#/$defs/theme"
+    },
+    "RichChoiceOption": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "The label to display for this option. Plain text is valid, but the renderer may interpret Markdown formatting.",
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "description": {
+          "description": "Additional Markdown-aware helper text shown under the label for this option.",
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "type": "string",
+          "description": "The stable value associated with this option."
+        }
+      },
+      "required": ["label", "value"],
+      "additionalProperties": false
+    },
+    "RichChoiceSelection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The stable selected option value."
+        },
+        "label": {
+          "type": "string",
+          "description": "The stored selected option label."
+        }
+      },
+      "required": ["value", "label"],
+      "additionalProperties": false
+    },
+    "anyComponent": {
+      "oneOf": [
+        {
+          "$ref": "basic_catalog.json#/components/Text"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Image"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Icon"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Video"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/AudioPlayer"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Row"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Column"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/List"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Card"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Tabs"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Modal"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Divider"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Button"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/TextField"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/CheckBox"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/ChoicePicker"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/Slider"
+        },
+        {
+          "$ref": "basic_catalog.json#/components/DateTimeInput"
+        },
+        {
+          "$ref": "#/components/RichChoicePicker"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "component"
+      }
+    },
+    "anyFunction": {
+      "oneOf": [
+        {
+          "$ref": "basic_catalog.json#/functions/required"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/regex"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/length"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/numeric"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/email"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/formatString"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/formatNumber"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/formatCurrency"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/formatDate"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/pluralize"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/openUrl"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/and"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/or"
+        },
+        {
+          "$ref": "basic_catalog.json#/functions/not"
+        }
+      ]
+    }
+  }
+}

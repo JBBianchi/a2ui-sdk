@@ -8,14 +8,16 @@ import {
 import {
   A2UIProvider as A2UIProviderV09,
   A2UIRenderer as A2UIRendererV09,
+  basicCatalog,
   createBasicFunctionRegistry,
   type A2UIMessage as A2UIMessageV09,
   type A2UIAction as A2UIActionV09,
 } from '@a2ui-sdk/react/0.9'
-
-const functionRegistryV09 = createBasicFunctionRegistry()
+import { richCatalog, usesRichCatalog } from '../catalogs/richCatalog'
 import { ErrorDisplay } from './ErrorDisplay'
 import type { A2UIVersion } from './VersionSelector'
+
+const functionRegistryV09 = createBasicFunctionRegistry()
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -77,6 +79,18 @@ interface PreviewProps {
   onAction?: (action: A2UIAction) => void
 }
 
+function resolveV09Catalog(messages: A2UIMessageV09[]) {
+  // The playground preview currently renders one catalog per preview.
+  // If any surface requests the rich catalog, use the extended runtime registry.
+  const shouldUseRichCatalog = messages.some(
+    (message) =>
+      'createSurface' in message &&
+      usesRichCatalog(message.createSurface.catalogId)
+  )
+
+  return shouldUseRichCatalog ? richCatalog : basicCatalog
+}
+
 export function Preview({ version, messages, error, onAction }: PreviewProps) {
   if (error) {
     return <ErrorDisplay title="JSON Parse Error" message={error} />
@@ -91,9 +105,14 @@ export function Preview({ version, messages, error, onAction }: PreviewProps) {
   }
 
   if (version === '0.9') {
+    const v09Messages = messages as A2UIMessageV09[]
+
     return (
       <ErrorBoundary resetKey={version}>
-        <A2UIProviderV09 messages={messages as A2UIMessageV09[]}>
+        <A2UIProviderV09
+          messages={v09Messages}
+          catalog={resolveV09Catalog(v09Messages)}
+        >
           <A2UIRendererV09
             onAction={onAction as (action: A2UIActionV09) => void}
             functionRegistry={functionRegistryV09}
