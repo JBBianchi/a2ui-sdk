@@ -102,8 +102,21 @@
               }
             },
             "value": {
-              "$ref": "common_types.json#/$defs/DynamicStringList",
-              "description": "The selected value or values stored in the data model."
+              "oneOf": [
+                {
+                  "$ref": "common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "$ref": "#/$defs/RichChoiceSelection"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/RichChoiceSelection"
+                  }
+                }
+              ],
+              "description": "The selected value stored in the data model. In mutually exclusive mode, bind this to one object like `{ \"value\": \"starter\", \"label\": \"**Starter**\" }`. In multiple selection mode, bind it to an array of those objects."
             },
             "filterable": {
               "type": "boolean",
@@ -185,6 +198,21 @@
         }
       },
       "required": ["label", "value"],
+      "additionalProperties": false
+    },
+    "RichChoiceSelection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The stable selected option value."
+        },
+        "label": {
+          "type": "string",
+          "description": "The stored selected option label."
+        }
+      },
+      "required": ["value", "label"],
       "additionalProperties": false
     },
     "anyComponent": {

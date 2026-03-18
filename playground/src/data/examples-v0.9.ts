@@ -513,8 +513,12 @@ export const examplesV09: ExampleV09[] = [
                 'heading',
                 'description',
                 'plan-select',
+                'plan-result',
+                'plan-submit-button',
+                'plan-submit-button-label',
                 'workspace-combobox',
                 'addons-panel',
+                'addons-result',
                 'card-baseline',
               ],
             },
@@ -558,6 +562,38 @@ export const examplesV09: ExampleV09[] = [
                   value: 'enterprise',
                 },
               ],
+            },
+            {
+              id: 'plan-result',
+              component: 'Text',
+              text: {
+                call: 'formatString',
+                args: {
+                  value:
+                    'Stored value: { "value": "${/selectedPlanSelect/value}", "label": "${/selectedPlanSelect/label}" }',
+                },
+                returnType: 'string',
+              },
+              variant: 'caption',
+            },
+            {
+              id: 'plan-submit-button',
+              component: 'Button',
+              child: 'plan-submit-button-label',
+              variant: 'primary',
+              action: {
+                event: {
+                  name: 'submit-selected-choice',
+                  context: {
+                    selectedChoice: { path: '/selectedPlanSelect' },
+                  },
+                },
+              },
+            },
+            {
+              id: 'plan-submit-button-label',
+              component: 'Text',
+              text: 'Send selectedChoice event',
             },
             {
               id: 'workspace-combobox',
@@ -618,6 +654,19 @@ export const examplesV09: ExampleV09[] = [
               ],
             },
             {
+              id: 'addons-result',
+              component: 'Text',
+              text: {
+                call: 'formatString',
+                args: {
+                  value:
+                    'First stored object: { "value": "${/selectedAddonsPanel/0/value}", "label": "${/selectedAddonsPanel/0/label}" }',
+                },
+                returnType: 'string',
+              },
+              variant: 'caption',
+            },
+            {
               id: 'card-baseline',
               component: 'RichChoicePicker',
               label: '### Card-style **support package** baseline',
@@ -654,10 +703,30 @@ export const examplesV09: ExampleV09[] = [
           surfaceId: 'main',
           path: '/',
           value: {
-            selectedPlanSelect: 'pro',
-            selectedWorkspaceProfile: 'operations-hub',
-            selectedAddonsPanel: ['support', 'analytics'],
-            selectedSupportPackages: ['embedded-coaching'],
+            selectedPlanSelect: {
+              value: 'pro',
+              label: '**Pro**',
+            },
+            selectedWorkspaceProfile: {
+              value: 'operations-hub',
+              label: '**Operations hub**',
+            },
+            selectedAddonsPanel: [
+              {
+                value: 'support',
+                label: '**Premium support**',
+              },
+              {
+                value: 'analytics',
+                label: '**Usage analytics**',
+              },
+            ],
+            selectedSupportPackages: [
+              {
+                value: 'embedded-coaching',
+                label: '**Embedded coaching**',
+              },
+            ],
           },
         },
       },
