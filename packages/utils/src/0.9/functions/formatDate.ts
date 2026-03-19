@@ -1,5 +1,5 @@
 /**
- * formatDate - Date formatting with TR35 pattern support via Intl.DateTimeFormat.
+ * formatDate - Date formatting with TR35 format support via Intl.DateTimeFormat.
  *
  * Per research R4, a thin TR35 tokenizer maps common patterns to
  * Intl.DateTimeFormat options.
@@ -40,10 +40,10 @@ const SORTED_TOKENS = Object.keys(TR35_TOKENS).sort(
 )
 
 /**
- * Parse a TR35 pattern into parts: tokens and literal strings.
+ * Parse a TR35 format string into parts: tokens and literal strings.
  */
 function parseTR35Pattern(
-  pattern: string
+  format: string
 ): Array<
   { type: 'token'; value: string } | { type: 'literal'; value: string }
 > {
@@ -52,12 +52,12 @@ function parseTR35Pattern(
   > = []
   let i = 0
 
-  while (i < pattern.length) {
+  while (i < format.length) {
     // Check for quoted literal text (e.g., 'at')
-    if (pattern[i] === "'") {
-      let end = pattern.indexOf("'", i + 1)
-      if (end === -1) end = pattern.length
-      parts.push({ type: 'literal', value: pattern.slice(i + 1, end) })
+    if (format[i] === "'") {
+      let end = format.indexOf("'", i + 1)
+      if (end === -1) end = format.length
+      parts.push({ type: 'literal', value: format.slice(i + 1, end) })
       i = end + 1
       continue
     }
@@ -65,7 +65,7 @@ function parseTR35Pattern(
     // Try to match a TR35 token
     let matched = false
     for (const token of SORTED_TOKENS) {
-      if (pattern.startsWith(token, i)) {
+      if (format.startsWith(token, i)) {
         parts.push({ type: 'token', value: token })
         i += token.length
         matched = true
@@ -77,9 +77,9 @@ function parseTR35Pattern(
       // Literal character
       const last = parts[parts.length - 1]
       if (last && last.type === 'literal') {
-        last.value += pattern[i]
+        last.value += format[i]
       } else {
-        parts.push({ type: 'literal', value: pattern[i] })
+        parts.push({ type: 'literal', value: format[i] })
       }
       i++
     }
@@ -108,7 +108,7 @@ export const formatDate: FunctionImplementation = {
   returnType: 'string',
   execute(args: Record<string, unknown>) {
     const value = args.value
-    const pattern = typeof args.pattern === 'string' ? args.pattern : undefined
+    const format = typeof args.format === 'string' ? args.format : undefined
     const locale = typeof args.locale === 'string' ? args.locale : undefined
 
     // Parse the input value to a Date
@@ -125,8 +125,8 @@ export const formatDate: FunctionImplementation = {
       return ''
     }
 
-    // If no pattern, use default locale formatting
-    if (!pattern) {
+    // If no format string is provided, use default locale formatting.
+    if (!format) {
       try {
         return new Intl.DateTimeFormat(locale).format(date)
       } catch {
@@ -134,8 +134,8 @@ export const formatDate: FunctionImplementation = {
       }
     }
 
-    // Parse TR35 pattern and format each part
-    const parts = parseTR35Pattern(pattern)
+    // Parse TR35 format string and format each part.
+    const parts = parseTR35Pattern(format)
     return parts
       .map((part) => {
         if (part.type === 'literal') return part.value

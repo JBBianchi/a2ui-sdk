@@ -13,6 +13,7 @@ import {
   resolveContext,
 } from './dataBinding.js'
 import type { DataModel, FormBindableValue } from '@a2ui-sdk/types/0.9'
+import { FunctionRegistry } from './functions/index.js'
 
 describe('dataBinding', () => {
   const testModel: DataModel = {
@@ -24,6 +25,16 @@ describe('dataBinding', () => {
     items: ['a', 'b', 'c'],
     count: 42,
   }
+  const registry = new FunctionRegistry()
+  registry.register({
+    name: 'joinNameAndStatus',
+    returnType: 'string',
+    execute(args) {
+      const name = String(args.name ?? '')
+      const active = Boolean(args.active)
+      return `${name}:${active ? 'active' : 'inactive'}`
+    },
+  })
 
   describe('isPathBinding', () => {
     it('should return true for path binding object', () => {
@@ -234,6 +245,40 @@ describe('dataBinding', () => {
       }
       expect(resolveContext(context, testModel)).toEqual({
         name: undefined,
+      })
+    })
+
+    it('should resolve context with function calls when registry is provided', () => {
+      const context = {
+        label: {
+          call: 'joinNameAndStatus',
+          args: {
+            name: { path: '/user/name' },
+            active: { path: '/user/active' },
+          },
+          returnType: 'string' as const,
+        },
+      }
+
+      expect(resolveContext(context, testModel, null, registry)).toEqual({
+        label: 'John:active',
+      })
+    })
+
+    it('should return undefined for function-backed context without a registry', () => {
+      const context = {
+        label: {
+          call: 'joinNameAndStatus',
+          args: {
+            name: { path: '/user/name' },
+            active: { path: '/user/active' },
+          },
+          returnType: 'string' as const,
+        },
+      }
+
+      expect(resolveContext(context, testModel)).toEqual({
+        label: undefined,
       })
     })
   })

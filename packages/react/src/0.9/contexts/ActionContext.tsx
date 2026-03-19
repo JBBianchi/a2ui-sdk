@@ -87,7 +87,8 @@ export function ActionProvider({
         const resolvedContext = resolveContext(
           action.event.context as Record<string, DynamicValue> | undefined,
           dataModel,
-          basePath
+          basePath,
+          functionRegistry
         )
 
         const payload: ActionPayload = {

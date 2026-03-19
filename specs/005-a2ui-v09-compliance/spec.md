@@ -46,7 +46,7 @@ A downstream developer creates a surface showing formatted content: currency amo
 1. **Given** a Text component with `text: { call: "formatString", args: { value: "Hello ${/user/name}, you have ${/count} items" } }` and data model `{ user: { name: "Alice" }, count: 5 }`, **When** rendered, **Then** the text displays "Hello Alice, you have 5 items".
 2. **Given** a Text component with `text: { call: "formatCurrency", args: { value: { path: "/price" }, currencyCode: "USD" } }` and data model `{ price: 19.99 }`, **When** rendered, **Then** the text displays "$19.99" (or locale-appropriate equivalent).
 3. **Given** a Text component with `text: "Hello ${/name}"` (raw string, NOT inside a `formatString` call), **When** rendered, **Then** the text displays the literal string "Hello ${/name}" without interpolation.
-4. **Given** a Text component with `text: { call: "formatDate", args: { value: { path: "/date" }, pattern: "yyyy-MM-dd" } }`, **When** rendered, **Then** the text displays the date formatted per the TR35 pattern.
+4. **Given** a Text component with `text: { call: "formatDate", args: { value: { path: "/date" }, format: "yyyy-MM-dd" } }`, **When** rendered, **Then** the text displays the date formatted per the TR35 pattern.
 
 ---
 

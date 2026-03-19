@@ -64,13 +64,14 @@ export function isFunctionCall(
  *
  * Resolution order:
  * 1. If value is a path binding object → resolve from data model
- * 2. If value is a function call → return undefined (function calls not evaluated here)
+ * 2. If value is a function call → evaluate via registry if available
  * 3. Otherwise → return literal value
  *
  * @param value - The dynamic value (literal, path binding, or function call)
  * @param dataModel - The data model for path lookups
  * @param basePath - Optional base path for relative path resolution
  * @param defaultValue - Default value if undefined or path not found
+ * @param registry - Optional function registry for FunctionCall evaluation
  * @returns The resolved value
  *
  * @example
@@ -224,11 +225,12 @@ export function resolveString(
 
 /**
  * Resolves action context values to a plain object.
- * All path bindings are resolved to their actual values.
+ * All DynamicValue entries are resolved to their actual values.
  *
  * @param context - Object with dynamic values
  * @param dataModel - The data model for path lookups
  * @param basePath - Optional base path for relative path resolution
+ * @param registry - Optional function registry for FunctionCall evaluation
  * @returns A plain object with resolved context values
  *
  * @example
@@ -243,7 +245,8 @@ export function resolveString(
 export function resolveContext(
   context: Record<string, DynamicValue> | undefined,
   dataModel: DataModel,
-  basePath: string | null = null
+  basePath: string | null = null,
+  registry?: FunctionRegistry
 ): Record<string, unknown> {
   if (!context) {
     return {}
@@ -252,7 +255,7 @@ export function resolveContext(
   const result: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(context)) {
-    result[key] = resolveValue(value, dataModel, basePath)
+    result[key] = resolveValue(value, dataModel, basePath, undefined, registry)
   }
 
   return result

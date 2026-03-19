@@ -10,6 +10,7 @@ import { ActionProvider } from '../contexts/ActionContext'
 import { useDispatchAction } from '../hooks/useDispatchAction'
 import { useRef, type ReactNode } from 'react'
 import { FunctionRegistry } from '@a2ui-sdk/utils/0.9'
+import { createBasicFunctionRegistry } from '../basic-catalog'
 
 /**
  * Test provider with all required contexts.
@@ -157,6 +158,122 @@ describe('Action dispatch integration', () => {
       expect(onAction).toHaveBeenCalledWith(
         expect.objectContaining({
           timestamp: expect.any(String),
+        })
+      )
+    })
+
+    it('should resolve function calls in event context when a registry is available', () => {
+      const onAction = vi.fn()
+      const registry = createBasicFunctionRegistry()
+
+      function TestComponent() {
+        const dispatchAction = useDispatchAction()
+
+        return (
+          <button
+            data-testid="dispatch"
+            onClick={() =>
+              dispatchAction('main', 'btn-1', {
+                event: {
+                  name: 'submit',
+                  context: {
+                    formattedDate: {
+                      call: 'formatDate',
+                      args: {
+                        value: { path: '/reservation/date' },
+                        format: 'dd/MM/yyyy',
+                        locale: 'en-US',
+                      },
+                      returnType: 'string',
+                    },
+                  },
+                },
+              })
+            }
+          >
+            Click
+          </button>
+        )
+      }
+
+      render(
+        <TestProvider onAction={onAction} functionRegistry={registry}>
+          <SurfaceSetup
+            surfaceId="main"
+            dataModel={{ reservation: { date: '2024-06-15T14:30:00Z' } }}
+          >
+            <TestComponent />
+          </SurfaceSetup>
+        </TestProvider>
+      )
+
+      act(() => {
+        screen.getByTestId('dispatch').click()
+      })
+
+      expect(onAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            formattedDate: '15/06/2024',
+          },
+        })
+      )
+    })
+
+    it('should keep event dispatch working when function-backed context cannot be resolved', () => {
+      const onAction = vi.fn()
+
+      function TestComponent() {
+        const dispatchAction = useDispatchAction()
+
+        return (
+          <button
+            data-testid="dispatch"
+            onClick={() =>
+              dispatchAction('main', 'btn-1', {
+                event: {
+                  name: 'submit',
+                  context: {
+                    formattedDate: {
+                      call: 'formatDate',
+                      args: {
+                        value: { path: '/reservation/date' },
+                        format: 'dd/MM/yyyy',
+                      },
+                      returnType: 'string',
+                    },
+                    rawDate: { path: '/reservation/date' },
+                  },
+                },
+              })
+            }
+          >
+            Click
+          </button>
+        )
+      }
+
+      render(
+        <TestProvider onAction={onAction}>
+          <SurfaceSetup
+            surfaceId="main"
+            dataModel={{ reservation: { date: '2024-06-15T14:30:00Z' } }}
+          >
+            <TestComponent />
+          </SurfaceSetup>
+        </TestProvider>
+      )
+
+      act(() => {
+        screen.getByTestId('dispatch').click()
+      })
+
+      expect(onAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            formattedDate: undefined,
+            rawDate: '2024-06-15T14:30:00Z',
+          },
         })
       )
     })

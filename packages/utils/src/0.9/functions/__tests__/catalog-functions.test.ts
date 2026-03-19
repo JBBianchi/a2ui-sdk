@@ -188,7 +188,7 @@ describe('formatDate', () => {
   // Use a fixed date for deterministic tests
   const isoDate = '2024-06-15T14:30:00Z'
 
-  it('should format a date with default formatting (no pattern)', () => {
+  it('should format a date with default formatting (no format)', () => {
     const result = formatDate.execute({ value: isoDate }, {}, null)
     expect(typeof result).toBe('string')
     expect(result.length).toBeGreaterThan(0)
@@ -196,7 +196,7 @@ describe('formatDate', () => {
 
   it('should format using TR35 pattern yyyy-MM-dd', () => {
     const result = formatDate.execute(
-      { value: isoDate, pattern: 'yyyy-MM-dd', locale: 'en-US' },
+      { value: isoDate, format: 'yyyy-MM-dd', locale: 'en-US' },
       {},
       null
     )
@@ -205,7 +205,7 @@ describe('formatDate', () => {
 
   it('should handle pattern with literal text in quotes', () => {
     const result = formatDate.execute(
-      { value: isoDate, pattern: "yyyy 'year'", locale: 'en-US' },
+      { value: isoDate, format: "yyyy 'year'", locale: 'en-US' },
       {},
       null
     )
@@ -225,7 +225,7 @@ describe('formatDate', () => {
   it('should handle numeric timestamps', () => {
     const timestamp = new Date('2024-01-01T00:00:00Z').getTime()
     const result = formatDate.execute(
-      { value: timestamp, pattern: 'yyyy', locale: 'en-US' },
+      { value: timestamp, format: 'yyyy', locale: 'en-US' },
       {},
       null
     )
@@ -234,20 +234,29 @@ describe('formatDate', () => {
 
   it('should handle locale parameter', () => {
     const result = formatDate.execute(
-      { value: isoDate, pattern: 'MMMM', locale: 'en-US' },
+      { value: isoDate, format: 'MMMM', locale: 'en-US' },
       {},
       null
     )
     expect(result).toBe('June')
   })
 
-  it('should handle pattern with only literal separators', () => {
+  it('should handle format with only literal separators', () => {
     const result = formatDate.execute(
-      { value: isoDate, pattern: 'dd/MM/yyyy', locale: 'en-US' },
+      { value: isoDate, format: 'dd/MM/yyyy', locale: 'en-US' },
       {},
       null
     )
     expect(result).toBe('15/06/2024')
+  })
+
+  it('should not treat pattern as a supported alias', () => {
+    const result = formatDate.execute(
+      { value: isoDate, pattern: 'yyyy-MM-dd', locale: 'en-US' },
+      {},
+      null
+    )
+    expect(result).not.toBe('2024-06-15')
   })
 
   it('has correct name and returnType', () => {
