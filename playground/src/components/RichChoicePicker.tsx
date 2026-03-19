@@ -1,15 +1,13 @@
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import {
-  useFunctionRegistry,
   useFormBinding,
-  useScope,
   useStringBinding,
   useValidation,
   type CheckRule,
-  type DynamicValue,
   type DynamicString,
+  type DynamicStringList,
 } from '@a2ui-sdk/react/0.9'
 
 import {
@@ -30,26 +28,6 @@ export interface RichChoiceOption {
   value: string
 }
 
-interface WriteTarget {
-  path: string
-}
-
-interface RichChoiceSelection {
-  value: string
-  label: string
-}
-
-interface LegacyRichChoiceSelection {
-  id: string
-  label: string
-}
-
-type RichChoiceValue =
-  | RichChoiceSelection
-  | RichChoiceSelection[]
-  | string
-  | string[]
-
 export interface RichChoicePickerProps {
   surfaceId: string
   componentId: string
@@ -58,184 +36,9 @@ export interface RichChoicePickerProps {
   variant?: 'multipleSelection' | 'mutuallyExclusive'
   displayStyle?: 'card' | 'select'
   options: RichChoiceOption[]
-  value: WriteTarget | RichChoiceSelection | RichChoiceSelection[]
+  value: DynamicStringList
   filterable?: boolean
   checks?: CheckRule[]
-}
-
-type Registry = ReturnType<typeof useFunctionRegistry>
-
-function isPathBinding(value: unknown): value is WriteTarget {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'path' in value &&
-    typeof value.path === 'string'
-  )
-}
-
-function isFunctionCall(
-  value: unknown
-): value is { call: string; args?: Record<string, unknown> } {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'call' in value &&
-    typeof value.call === 'string'
-  )
-}
-
-function resolveScopedPath(path: string, basePath: string | null) {
-  if (path.startsWith('/')) {
-    return path
-  }
-
-  return basePath ? `${basePath}/${path}` : `/${path}`
-}
-
-function decodePointerSegment(segment: string) {
-  return segment.replace(/~1/g, '/').replace(/~0/g, '~')
-}
-
-function getValueAtPath(model: unknown, path: string): unknown {
-  if (path === '/') {
-    return model
-  }
-
-  if (!path.startsWith('/')) {
-    return undefined
-  }
-
-  const segments = path
-    .slice(1)
-    .split('/')
-    .filter(Boolean)
-    .map(decodePointerSegment)
-
-  let current: unknown = model
-
-  for (const segment of segments) {
-    if (current === null || current === undefined) {
-      return undefined
-    }
-
-    if (Array.isArray(current)) {
-      const index = Number(segment)
-      if (!Number.isInteger(index)) {
-        return undefined
-      }
-      current = current[index]
-      continue
-    }
-
-    if (typeof current === 'object') {
-      current = (current as Record<string, unknown>)[segment]
-      continue
-    }
-
-    return undefined
-  }
-
-  return current
-}
-
-function resolveDynamicValue(
-  value: unknown,
-  dataModel: Record<string, unknown>,
-  basePath: string | null,
-  registry: Registry
-): unknown {
-  if (value === null || value === undefined) {
-    return value
-  }
-
-  if (isPathBinding(value)) {
-    return getValueAtPath(dataModel, resolveScopedPath(value.path, basePath))
-  }
-
-  if (isFunctionCall(value)) {
-    if (!registry) {
-      return undefined
-    }
-
-    const resolvedArgs: Record<string, unknown> = {}
-    for (const [key, arg] of Object.entries(value.args ?? {})) {
-      resolvedArgs[key] = resolveDynamicValue(
-        arg,
-        dataModel,
-        basePath,
-        registry
-      )
-    }
-
-    return registry.execute(value.call, resolvedArgs, dataModel, basePath)
-  }
-
-  return value
-}
-
-function getSelectionPayload(
-  option: RichChoiceOption,
-  dataModel: Record<string, unknown>,
-  basePath: string | null,
-  registry: Registry
-): RichChoiceSelection {
-  const resolvedLabel = resolveDynamicValue(
-    option.label as DynamicValue,
-    dataModel,
-    basePath,
-    registry
-  )
-
-  return {
-    value: option.value,
-    label:
-      typeof resolvedLabel === 'string'
-        ? resolvedLabel
-        : resolvedLabel === null || resolvedLabel === undefined
-          ? option.value
-          : String(resolvedLabel),
-  }
-}
-
-function isRichChoiceSelection(value: unknown): value is RichChoiceSelection {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'value' in value &&
-    typeof value.value === 'string' &&
-    'label' in value &&
-    typeof value.label === 'string'
-  )
-}
-
-function isLegacyRichChoiceSelection(
-  value: unknown
-): value is LegacyRichChoiceSelection {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    typeof value.id === 'string' &&
-    'label' in value &&
-    typeof value.label === 'string'
-  )
-}
-
-function getSelectionValue(value: unknown): string | null {
-  if (typeof value === 'string') {
-    return value
-  }
-
-  if (isRichChoiceSelection(value)) {
-    return value.value
-  }
-
-  if (isLegacyRichChoiceSelection(value)) {
-    return value.id
-  }
-
-  return null
 }
 
 function stripMarkdown(text: string) {
@@ -665,8 +468,6 @@ export const RichChoicePicker = memo(function RichChoicePicker({
   checks,
   weight,
 }: RichChoicePickerProps) {
-  const { basePath } = useScope()
-  const registry = useFunctionRegistry()
   const labelText = useStringBinding(surfaceId, label, '')
   const { valid, errors } = useValidation(surfaceId, checks)
   const [hasInteracted, setHasInteracted] = useState(false)
@@ -674,86 +475,48 @@ export const RichChoicePicker = memo(function RichChoicePicker({
   const [singleSelectOpen, setSingleSelectOpen] = useState(false)
   const [multiSelectOpen, setMultiSelectOpen] = useState(false)
   const singleSelection = variant === 'mutuallyExclusive'
-  const [dataModel] = useFormBinding<Record<string, unknown>>(surfaceId, {
-    path: '/',
-  })
-
-  const [selectedValue, setSelectedValue] =
-    useFormBinding<RichChoiceValue | null>(
-      surfaceId,
-      valueProp as unknown as DynamicValue,
-      singleSelection ? null : []
-    )
-
-  const optionByValue = useMemo(
-    () => new Map(options.map((option) => [option.value, option])),
-    [options]
+  const [selectedValue, setSelectedValue] = useFormBinding<string | string[]>(
+    surfaceId,
+    valueProp,
+    singleSelection ? '' : []
   )
 
-  const currentSelectionValues = useMemo(() => {
-    const source = Array.isArray(selectedValue)
-      ? selectedValue
-      : selectedValue
-        ? [selectedValue]
-        : []
-
-    return source
-      .map((entry) => getSelectionValue(entry))
-      .filter((entry): entry is string => Boolean(entry))
-  }, [selectedValue])
+  const currentSelections = Array.isArray(selectedValue)
+    ? selectedValue
+    : selectedValue
+      ? [selectedValue]
+      : []
 
   const handleSingleChange = useCallback(
     (nextValue: string) => {
-      const option = optionByValue.get(nextValue)
-      if (!option) {
-        return
-      }
-
       setHasInteracted(true)
-      setSelectedValue(
-        getSelectionPayload(option, dataModel, basePath, registry)
-      )
+      setSelectedValue(nextValue)
     },
-    [optionByValue, setSelectedValue, dataModel, basePath, registry]
+    [setSelectedValue]
   )
 
   const handleMultiChange = useCallback(
     (nextValue: string, checked: boolean) => {
       setHasInteracted(true)
-      const nextSelectionValues = checked
-        ? currentSelectionValues.includes(nextValue)
-          ? currentSelectionValues
-          : [...currentSelectionValues, nextValue]
-        : currentSelectionValues.filter((value) => value !== nextValue)
-
-      const nextSelections = nextSelectionValues
-        .map((value) => optionByValue.get(value))
-        .filter((option): option is RichChoiceOption => Boolean(option))
-        .map((option) =>
-          getSelectionPayload(option, dataModel, basePath, registry)
-        )
-
+      const nextSelections = checked
+        ? [...currentSelections, nextValue]
+        : currentSelections.filter((value) => value !== nextValue)
       setSelectedValue(nextSelections)
     },
-    [
-      currentSelectionValues,
-      optionByValue,
-      setSelectedValue,
-      dataModel,
-      basePath,
-      registry,
-    ]
+    [currentSelections, setSelectedValue]
   )
 
   const visibleErrors = hasInteracted && !valid ? errors : []
   const invalid = visibleErrors.length > 0
   const style = weight ? { flexGrow: weight } : undefined
   const filterInputId = `rich-choice-filter-${componentId}`
-  const singleSelectedValue = currentSelectionValues[0] || ''
+  const singleSelectedValue = Array.isArray(selectedValue)
+    ? selectedValue[0] || ''
+    : selectedValue
   const selectedOption = options.find(
     (option) => option.value === singleSelectedValue
   )
-  const selectedOptions = currentSelectionValues
+  const selectedOptions = currentSelections
     .map((value) => options.find((option) => option.value === value))
     .filter((option): option is RichChoiceOption => Boolean(option))
   const firstSelectedOption = selectedOptions[0]
@@ -787,7 +550,7 @@ export const RichChoicePicker = memo(function RichChoicePicker({
           className="flex flex-col gap-3"
         >
           {options.map((option) => {
-            const selected = currentSelectionValues.includes(option.value)
+            const selected = currentSelections.includes(option.value)
             return (
               <RichChoiceOptionCard
                 key={option.value}
@@ -946,9 +709,7 @@ export const RichChoicePicker = memo(function RichChoicePicker({
                 ) : null}
                 <CommandGroup>
                   {options.map((option) => {
-                    const selected = currentSelectionValues.includes(
-                      option.value
-                    )
+                    const selected = currentSelections.includes(option.value)
                     return (
                       <RichChoiceMultiCommandItem
                         key={option.value}

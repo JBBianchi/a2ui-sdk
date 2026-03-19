@@ -10,6 +10,15 @@ export const richCatalog: Catalog = {
     ...basicCatalog.components,
     RichChoicePicker,
   },
+  functions: {
+    ...basicCatalog.functions,
+    get: {
+      returnType: 'any',
+    },
+    map: {
+      returnType: 'any',
+    },
+  },
 }
 
 export function usesRichCatalog(catalogId: string | undefined): boolean {

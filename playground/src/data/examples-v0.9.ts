@@ -531,7 +531,7 @@ export const examplesV09: ExampleV09[] = [
             {
               id: 'description',
               component: 'Text',
-              text: 'This surface uses a dedicated `rich_catalog.json` that extends the basic catalog with a Markdown-aware `RichChoicePicker`, covering non-searchable select, searchable combobox, multi-select popup, and card layout behaviors.',
+              text: 'This surface uses a dedicated `rich_catalog.json` that extends the basic catalog with a Markdown-aware `RichChoicePicker`, plus a custom `map` lookup function. The submit button event includes both the selected choice and the mapped plan definition.',
               variant: 'body',
             },
             {
@@ -569,8 +569,7 @@ export const examplesV09: ExampleV09[] = [
               text: {
                 call: 'formatString',
                 args: {
-                  value:
-                    'Stored value: { "value": "${/selectedPlanSelect/value}", "label": "${/selectedPlanSelect/label}" }',
+                  value: 'Stored value: "${/selectedPlanSelect}"',
                 },
                 returnType: 'string',
               },
@@ -586,6 +585,14 @@ export const examplesV09: ExampleV09[] = [
                   name: 'submit-selected-choice',
                   context: {
                     selectedChoice: { path: '/selectedPlanSelect' },
+                    selectedChoiceDefinition: {
+                      call: 'map',
+                      args: {
+                        valuePath: '/selectedPlanSelect',
+                        datasetPath: '/planDefinitions',
+                        key: 'id',
+                      },
+                    },
                   },
                 },
               },
@@ -659,8 +666,7 @@ export const examplesV09: ExampleV09[] = [
               text: {
                 call: 'formatString',
                 args: {
-                  value:
-                    'First stored object: { "value": "${/selectedAddonsPanel/0/value}", "label": "${/selectedAddonsPanel/0/label}" }',
+                  value: 'First stored value: "${/selectedAddonsPanel/0}"',
                 },
                 returnType: 'string',
               },
@@ -703,30 +709,30 @@ export const examplesV09: ExampleV09[] = [
           surfaceId: 'main',
           path: '/',
           value: {
-            selectedPlanSelect: {
-              value: 'pro',
-              label: '**Pro**',
-            },
-            selectedWorkspaceProfile: {
-              value: 'operations-hub',
-              label: '**Operations hub**',
-            },
-            selectedAddonsPanel: [
+            selectedPlanSelect: 'pro',
+            planDefinitions: [
               {
-                value: 'support',
-                label: '**Premium support**',
+                id: 'starter',
+                tier: 'Starter',
+                monthlyPrice: 19,
+                seatsIncluded: 5,
               },
               {
-                value: 'analytics',
-                label: '**Usage analytics**',
+                id: 'pro',
+                tier: 'Pro',
+                monthlyPrice: 79,
+                seatsIncluded: 25,
               },
-            ],
-            selectedSupportPackages: [
               {
-                value: 'embedded-coaching',
-                label: '**Embedded coaching**',
+                id: 'enterprise',
+                tier: 'Enterprise',
+                monthlyPrice: 249,
+                seatsIncluded: 250,
               },
             ],
+            selectedWorkspaceProfile: 'operations-hub',
+            selectedAddonsPanel: ['support', 'analytics'],
+            selectedSupportPackages: ['embedded-coaching'],
           },
         },
       },

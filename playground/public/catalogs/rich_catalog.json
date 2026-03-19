@@ -2,63 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://a2ui-sdk.js.org/catalogs/rich_catalog.json",
   "title": "A2UI Rich Catalog",
-  "description": "A standalone catalog that extends the A2UI basic catalog with a Markdown-aware RichChoicePicker component.",
+  "description": "An extension catalog that adds a Markdown-aware RichChoicePicker component and a path-based map lookup function on top of the A2UI basic catalog.",
   "catalogId": "https://a2ui-sdk.js.org/catalogs/rich_catalog.json",
   "components": {
-    "Text": {
-      "$ref": "basic_catalog.json#/components/Text"
-    },
-    "Image": {
-      "$ref": "basic_catalog.json#/components/Image"
-    },
-    "Icon": {
-      "$ref": "basic_catalog.json#/components/Icon"
-    },
-    "Video": {
-      "$ref": "basic_catalog.json#/components/Video"
-    },
-    "AudioPlayer": {
-      "$ref": "basic_catalog.json#/components/AudioPlayer"
-    },
-    "Row": {
-      "$ref": "basic_catalog.json#/components/Row"
-    },
-    "Column": {
-      "$ref": "basic_catalog.json#/components/Column"
-    },
-    "List": {
-      "$ref": "basic_catalog.json#/components/List"
-    },
-    "Card": {
-      "$ref": "basic_catalog.json#/components/Card"
-    },
-    "Tabs": {
-      "$ref": "basic_catalog.json#/components/Tabs"
-    },
-    "Modal": {
-      "$ref": "basic_catalog.json#/components/Modal"
-    },
-    "Divider": {
-      "$ref": "basic_catalog.json#/components/Divider"
-    },
-    "Button": {
-      "$ref": "basic_catalog.json#/components/Button"
-    },
-    "TextField": {
-      "$ref": "basic_catalog.json#/components/TextField"
-    },
-    "CheckBox": {
-      "$ref": "basic_catalog.json#/components/CheckBox"
-    },
-    "ChoicePicker": {
-      "$ref": "basic_catalog.json#/components/ChoicePicker"
-    },
-    "Slider": {
-      "$ref": "basic_catalog.json#/components/Slider"
-    },
-    "DateTimeInput": {
-      "$ref": "basic_catalog.json#/components/DateTimeInput"
-    },
     "RichChoicePicker": {
       "type": "object",
       "allOf": [
@@ -102,21 +48,8 @@
               }
             },
             "value": {
-              "oneOf": [
-                {
-                  "$ref": "common_types.json#/$defs/DataBinding"
-                },
-                {
-                  "$ref": "#/$defs/RichChoiceSelection"
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/$defs/RichChoiceSelection"
-                  }
-                }
-              ],
-              "description": "The selected value stored in the data model. In mutually exclusive mode, bind this to one object like `{ \"value\": \"starter\", \"label\": \"**Starter**\" }`. In multiple selection mode, bind it to an array of those objects."
+              "$ref": "common_types.json#/$defs/DynamicStringList",
+              "description": "The selected value or values stored in the data model."
             },
             "filterable": {
               "type": "boolean",
@@ -131,47 +64,108 @@
     }
   },
   "functions": {
-    "required": {
-      "$ref": "basic_catalog.json#/functions/required"
+    "get": {
+      "type": "object",
+      "description": "Returns the property named by `key` from the object provided by `value` or loaded from `valuePath`. This is useful for projecting one field from the result of another function such as `map`.",
+      "properties": {
+        "call": {
+          "const": "get"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "valuePath": {
+              "type": "string",
+              "description": "Path to the source object."
+            },
+            "value": {
+              "description": "Alias for `valuePath`, or a nested function call that resolves to an object.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "common_types.json#/$defs/DynamicValue"
+                }
+              ]
+            },
+            "key": {
+              "type": "string",
+              "description": "The property name to read from the source object."
+            }
+          },
+          "required": ["key"],
+          "anyOf": [
+            {
+              "required": ["valuePath"]
+            },
+            {
+              "required": ["value"]
+            }
+          ],
+          "unevaluatedProperties": false
+        },
+        "returnType": {
+          "const": "any"
+        }
+      },
+      "required": ["call", "args"],
+      "unevaluatedProperties": false
     },
-    "regex": {
-      "$ref": "basic_catalog.json#/functions/regex"
-    },
-    "length": {
-      "$ref": "basic_catalog.json#/functions/length"
-    },
-    "numeric": {
-      "$ref": "basic_catalog.json#/functions/numeric"
-    },
-    "email": {
-      "$ref": "basic_catalog.json#/functions/email"
-    },
-    "formatString": {
-      "$ref": "basic_catalog.json#/functions/formatString"
-    },
-    "formatNumber": {
-      "$ref": "basic_catalog.json#/functions/formatNumber"
-    },
-    "formatCurrency": {
-      "$ref": "basic_catalog.json#/functions/formatCurrency"
-    },
-    "formatDate": {
-      "$ref": "basic_catalog.json#/functions/formatDate"
-    },
-    "pluralize": {
-      "$ref": "basic_catalog.json#/functions/pluralize"
-    },
-    "openUrl": {
-      "$ref": "basic_catalog.json#/functions/openUrl"
-    },
-    "and": {
-      "$ref": "basic_catalog.json#/functions/and"
-    },
-    "or": {
-      "$ref": "basic_catalog.json#/functions/or"
-    },
-    "not": {
-      "$ref": "basic_catalog.json#/functions/not"
+    "map": {
+      "type": "object",
+      "description": "Looks up the dataset at `datasetPath` (or `dataset`) and returns the first entity whose `key` property matches the value found at `valuePath` (or `value`). Both path arguments accept absolute JSON Pointer paths or relative paths scoped to the current base path.",
+      "properties": {
+        "call": {
+          "const": "map"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "valuePath": {
+              "type": "string",
+              "description": "Path to the value to match against the dataset."
+            },
+            "value": {
+              "type": "string",
+              "description": "Alias for `valuePath`."
+            },
+            "datasetPath": {
+              "type": "string",
+              "description": "Path to the dataset to search."
+            },
+            "dataset": {
+              "type": "string",
+              "description": "Alias for `datasetPath`."
+            },
+            "key": {
+              "type": "string",
+              "description": "The property name on each dataset entity to compare."
+            }
+          },
+          "required": ["key"],
+          "anyOf": [
+            {
+              "required": ["valuePath", "datasetPath"]
+            },
+            {
+              "required": ["value", "dataset"]
+            },
+            {
+              "required": ["valuePath", "dataset"]
+            },
+            {
+              "required": ["value", "datasetPath"]
+            }
+          ],
+          "unevaluatedProperties": false
+        },
+        "returnType": {
+          "const": "any"
+        }
+      },
+      "required": ["call", "args"],
+      "unevaluatedProperties": false
     }
   },
   "$defs": {
@@ -200,76 +194,10 @@
       "required": ["label", "value"],
       "additionalProperties": false
     },
-    "RichChoiceSelection": {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "The stable selected option value."
-        },
-        "label": {
-          "type": "string",
-          "description": "The stored selected option label."
-        }
-      },
-      "required": ["value", "label"],
-      "additionalProperties": false
-    },
     "anyComponent": {
       "oneOf": [
         {
-          "$ref": "basic_catalog.json#/components/Text"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Image"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Icon"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Video"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/AudioPlayer"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Row"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Column"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/List"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Card"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Tabs"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Modal"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Divider"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Button"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/TextField"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/CheckBox"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/ChoicePicker"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/Slider"
-        },
-        {
-          "$ref": "basic_catalog.json#/components/DateTimeInput"
+          "$ref": "basic_catalog.json#/$defs/anyComponent"
         },
         {
           "$ref": "#/components/RichChoicePicker"
@@ -282,46 +210,13 @@
     "anyFunction": {
       "oneOf": [
         {
-          "$ref": "basic_catalog.json#/functions/required"
+          "$ref": "basic_catalog.json#/$defs/anyFunction"
         },
         {
-          "$ref": "basic_catalog.json#/functions/regex"
+          "$ref": "#/functions/get"
         },
         {
-          "$ref": "basic_catalog.json#/functions/length"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/numeric"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/email"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/formatString"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/formatNumber"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/formatCurrency"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/formatDate"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/pluralize"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/openUrl"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/and"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/or"
-        },
-        {
-          "$ref": "basic_catalog.json#/functions/not"
+          "$ref": "#/functions/map"
         }
       ]
     }

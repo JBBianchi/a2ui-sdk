@@ -13,11 +13,15 @@ import {
   type A2UIMessage as A2UIMessageV09,
   type A2UIAction as A2UIActionV09,
 } from '@a2ui-sdk/react/0.9'
+import { getFunction } from '../catalogs/getFunction'
 import { richCatalog, usesRichCatalog } from '../catalogs/richCatalog'
+import { mapFunction } from '../catalogs/mapFunction'
 import { ErrorDisplay } from './ErrorDisplay'
 import type { A2UIVersion } from './VersionSelector'
 
 const functionRegistryV09 = createBasicFunctionRegistry()
+functionRegistryV09.register(getFunction)
+functionRegistryV09.register(mapFunction)
 
 interface ErrorBoundaryProps {
   children: ReactNode
