@@ -588,8 +588,8 @@ export const examplesV09: ExampleV09[] = [
                     selectedChoiceDefinition: {
                       call: 'map',
                       args: {
-                        valuePath: '/selectedPlanSelect',
-                        datasetPath: '/planDefinitions',
+                        value: { path: '/selectedPlanSelect' },
+                        dataset: { path: '/planDefinitions' },
                         key: 'id',
                       },
                     },

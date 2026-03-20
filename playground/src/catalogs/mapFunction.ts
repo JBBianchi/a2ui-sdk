@@ -1,9 +1,4 @@
-import {
-  getPathArg,
-  getValueAtPath,
-  isRecord,
-  resolveScopedPath,
-} from './catalogFunctionUtils'
+import { isRecord } from './catalogFunctionUtils'
 
 type FunctionImplementation = {
   name: string
@@ -20,27 +15,17 @@ export const mapFunction: FunctionImplementation = {
   returnType: 'any',
   execute(
     args: Record<string, unknown>,
-    dataModel: Record<string, unknown>,
-    basePath: string | null
+    _dataModel: Record<string, unknown>,
+    _basePath: string | null
   ) {
-    const valuePath = getPathArg(args, 'valuePath', 'value')
-    const datasetPath = getPathArg(args, 'datasetPath', 'dataset')
+    const value = args.value // Expect to be { "path": "/some/path" } that has been resolved by the caller to the actual value at that path
+    const dataset = args.dataset as
+      | Array<Record<string, unknown>>
+      | Record<string, unknown>
+      | undefined // Expect to be { "path": "/some/path" } that has been resolved by the caller to the actual value at that path
     const key = typeof args.key === 'string' ? args.key : null
 
-    if (!valuePath || !datasetPath || !key) {
-      return undefined
-    }
-
-    const value = getValueAtPath(
-      dataModel,
-      resolveScopedPath(valuePath, basePath)
-    )
-    const dataset = getValueAtPath(
-      dataModel,
-      resolveScopedPath(datasetPath, basePath)
-    )
-
-    if (value === undefined || dataset === undefined) {
+    if (value === undefined || dataset === undefined || key === null) {
       return undefined
     }
 
